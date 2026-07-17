@@ -2,6 +2,7 @@
 
 本仓库用于通过 GitHub Pages 发布 AI 自学课件，支持电脑与手机浏览。
 
+- 在线课件：https://renyubin2014.github.io/ai-learning-courseware/
 - 入口：`index.html`
 - 当前课程：20 节
 - 内容版本：2026-07-17，北京时间
