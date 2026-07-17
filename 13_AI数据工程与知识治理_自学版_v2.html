@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 数据工程与知识治理 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #0891b2;
+      --accent-dark: #0e7490;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 技术基础 13</p>
+          <h1>AI 数据工程与知识治理</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：理解 AI 应用背后的数据、知识库、权限和更新机制。</span>
+          <span class="pill">输出：一张知识治理清单</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">13</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>理解 AI 应用背后的数据、知识库、权限和更新机制。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>数据盘点</strong><span>识别哪些资料能进 AI 系统。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>清洗结构</strong><span>处理格式、字段、重复和质量问题。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>权限治理</strong><span>控制谁能看、谁能用、谁能更新。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>持续更新</strong><span>建立版本、时效和回滚机制。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：AI 的质量常常取决于数据治理</h2>
+            <p class="lead">模型再强，也不能稳定弥补脏数据、旧资料、权限混乱和来源不可追溯。AI PM 要理解数据进入模型前发生了什么。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>可用数据</h3>
+                  <p>资料是否准确、完整、结构清楚、允许使用。</p>
+                </div>
+                <div class="info-card">
+                  <h3>可控权限</h3>
+                  <p>不同用户能访问的资料范围必须清楚。</p>
+                </div>
+                <div class="info-card">
+                  <h3>可追溯更新</h3>
+                  <p>资料从哪里来、何时更新、谁批准，都要可追踪。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>AI 应用不是直接吃数据，而是吃经过治理的上下文。</strong>
+                  <p>数据治理差，RAG 和 Agent 都会不稳。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>数据盘点：先知道你有什么</h2>
+            <p class="lead">做 AI 应用前，要盘点文档、数据库、表格、日志、图片、音频和业务规则，判断哪些能用、哪些不能用。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>数据源</h3>
+                  <p>制度文档、FAQ、订单、评价、工单、地图、POI、运营表格。</p>
+                </div>
+                <div class="info-card">
+                  <h3>所有者</h3>
+                  <p>每类数据归谁维护，谁能批准进入 AI 系统。</p>
+                </div>
+                <div class="info-card">
+                  <h3>质量</h3>
+                  <p>是否过期、重复、冲突、字段缺失或口径不一致。</p>
+                </div>
+                <div class="info-card">
+                  <h3>合规</h3>
+                  <p>是否包含个人信息、敏感经营数据或受限内容。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://pair.withgoogle.com/guidebook-v2/" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">Google PAIR</span>
+                  <strong>People + AI Guidebook：负责任地构建数据集</strong>
+                  <p>从代表性、采集、标注、偏差和持续维护理解数据治理与产品质量的关系。</p>
+                  <span class="resource-action">建议：对照现有资料列一张来源、权限、更新时间清单。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>清洗结构：把资料变成可检索上下文</h2>
+            <p class="lead">AI 不适合直接处理一堆混乱文件。需要清洗、切分、加元数据、建立索引和质量检查。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>采集</b>
+                  <span>从文档、库表、网页或人工上传获取。</span>
+                </div>
+                <div class="flow-step">
+                  <b>清洗</b>
+                  <span>去重、去噪、修正格式。</span>
+                </div>
+                <div class="flow-step">
+                  <b>切分</b>
+                  <span>按语义单元拆成 chunk。</span>
+                </div>
+                <div class="flow-step">
+                  <b>标注</b>
+                  <span>加来源、时间、权限、主题。</span>
+                </div>
+                <div class="flow-step">
+                  <b>索引</b>
+                  <span>建立关键词和向量检索。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>元数据很关键</h3>
+                  <p>没有时间、来源、权限和业务线，后续很难过滤和引用。</p>
+                </div>
+                <div class="info-card">
+                  <h3>口径要统一</h3>
+                  <p>同一指标在不同表里含义不同，会导致 AI 解释错误。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>权限治理：模型不能看到不该看的资料</h2>
+            <p class="lead">权限不是前端问题。只要无权限资料进入上下文，模型就可能泄露。权限过滤要进入检索和工具层。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>RBAC</h3>
+                  <p>按角色控制访问，例如运营、主管、管理员。</p>
+                </div>
+                <div class="info-card">
+                  <h3>ABAC</h3>
+                  <p>按属性控制访问，例如城市、业务线、数据敏感级别。</p>
+                </div>
+                <div class="info-card">
+                  <h3>最小权限</h3>
+                  <p>模型和用户只拿完成任务所需的最少资料。</p>
+                </div>
+                <div class="info-card">
+                  <h3>审计</h3>
+                  <p>记录谁查询了什么资料、模型引用了哪些来源。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>更新机制：知识库会变旧</h2>
+            <p class="lead">AI 系统上线后，知识库、业务规则、商品、门店和政策都在变化。没有更新机制，答案会越来越不可信。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>Freshness</h3>
+                  <p>记录资料更新时间，并在冲突时优先新资料。</p>
+                </div>
+                <div class="info-card">
+                  <h3>版本管理</h3>
+                  <p>知识库变更要能回溯和回滚。</p>
+                </div>
+                <div class="info-card">
+                  <h3>冲突处理</h3>
+                  <p>同一问题出现多个规则时，提示冲突而不是强行合并。</p>
+                </div>
+                <div class="info-card">
+                  <h3>质量监控</h3>
+                  <p>定期检查空召回、低引用、过期资料和用户反馈。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage glossary-stage" data-stage="5">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="Data Governance" type="button">Data Governance</button>
+              <button class="keyword" data-term="Data Catalog" type="button">Data Catalog</button>
+              <button class="keyword" data-term="Metadata" type="button">Metadata</button>
+              <button class="keyword" data-term="Data Quality" type="button">Data Quality</button>
+              <button class="keyword" data-term="ETL" type="button">ETL</button>
+              <button class="keyword" data-term="Chunking" type="button">Chunking</button>
+              <button class="keyword" data-term="Indexing" type="button">Indexing</button>
+              <button class="keyword" data-term="RBAC" type="button">RBAC</button>
+              <button class="keyword" data-term="ABAC" type="button">ABAC</button>
+              <button class="keyword" data-term="PII" type="button">PII</button>
+              <button class="keyword" data-term="Data Lineage" type="button">Data Lineage</button>
+              <button class="keyword" data-term="Freshness" type="button">Freshness</button>
+              <button class="keyword" data-term="Access Control" type="button">Access Control</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">Data Governance</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">数据治理，管理数据质量、权限、来源和使用边界。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">决定哪些商家数据可以进入 AI 分析助手。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="6">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么数据治理会影响 AI 输出？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>AI 输出依赖上下文。数据旧、脏、冲突或无权限，会直接导致错误、泄露或不可追溯。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>Metadata 为什么重要？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>它让系统能按来源、时间、权限和主题过滤资料，也让答案能引用和追溯。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>权限为什么不能只靠前端控制？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>如果无权限资料已经进入模型上下文，模型可能在回答中泄露；权限必须在检索和工具层过滤。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>知识库更新要关注什么？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>关注更新时间、版本、冲突、回滚、过期资料清理和用户反馈。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">数据盘点</button>
+          <button class="step-button" data-step="2" type="button">清洗结构</button>
+          <button class="step-button" data-step="3" type="button">权限</button>
+          <button class="step-button" data-step="4" type="button">更新</button>
+          <button class="step-button" data-step="5" type="button">关键词学习</button>
+          <button class="step-button" data-step="6" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "Data Governance": {
+            "definition": "数据治理，管理数据质量、权限、来源和使用边界。",
+            "example": "决定哪些商家数据可以进入 AI 分析助手。"
+      },
+      "Data Catalog": {
+            "definition": "数据目录，记录有哪些数据、在哪里、谁负责。",
+            "example": "列出订单表、POI 表、评价表和字段含义。"
+      },
+      "Metadata": {
+            "definition": "描述数据的数据。",
+            "example": "文档来源、更新时间、权限级别、业务线都是 metadata。"
+      },
+      "Data Quality": {
+            "definition": "数据准确性、完整性、一致性和时效性。",
+            "example": "地址缺失或经纬度错误会影响选址分析。"
+      },
+      "ETL": {
+            "definition": "抽取、转换、加载的数据处理过程。",
+            "example": "从业务表抽订单数据，清洗后写入分析表。"
+      },
+      "Chunking": {
+            "definition": "把长文档切分成片段。",
+            "example": "按制度条款切 chunk，方便 RAG 检索。"
+      },
+      "Indexing": {
+            "definition": "建立检索索引。",
+            "example": "为知识库建立关键词索引和向量索引。"
+      },
+      "RBAC": {
+            "definition": "基于角色的权限控制。",
+            "example": "客服只能看客服制度，运营能看门店运营数据。"
+      },
+      "ABAC": {
+            "definition": "基于属性的权限控制。",
+            "example": "只允许城市负责人查看本城市数据。"
+      },
+      "PII": {
+            "definition": "个人可识别信息。",
+            "example": "手机号、身份证、精确住址和轨迹可能是 PII。"
+      },
+      "Data Lineage": {
+            "definition": "数据血缘，记录数据从哪里来、如何加工。",
+            "example": "报告中的客流指标来自哪个表、什么脚本、什么日期。"
+      },
+      "Freshness": {
+            "definition": "数据新鲜度。",
+            "example": "政策更新后，旧条款应下线或降权。"
+      },
+      "Access Control": {
+            "definition": "访问控制。",
+            "example": "检索时先过滤用户无权访问的资料。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

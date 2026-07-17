@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 个人知识库与研究助手实战 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #9333ea;
+      --accent-dark: #6b21a8;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 应用实践 18</p>
+          <h1>AI 个人知识库与研究助手实战</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：把前面学到的 RAG、Prompt、评估和工作流组合成一个个人研究助手项目。</span>
+          <span class="pill">输出：一份个人 AI 助手项目方案</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">18</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>把前面学到的 RAG、Prompt、评估和工作流组合成一个个人研究助手项目。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>定用户</strong><span>用户就是你自己，任务是研究和学习。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>定资料</strong><span>课程、笔记、网页、报告和实验日志。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>定工作流</strong><span>检索、总结、提问、生成复盘。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>定评估</strong><span>引用准确、答案有用、节省时间。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：个人知识库是最适合练手的 AI 项目</h2>
+            <p class="lead">它数据可控、场景真实、风险可控，又能覆盖 RAG、Prompt、结构化输出、评估和产品工作流。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>真实需求</h3>
+                  <p>你每天都要学习、查资料、复盘和做项目。</p>
+                </div>
+                <div class="info-card">
+                  <h3>可控数据</h3>
+                  <p>资料来自自己的笔记、课件、研究和网页摘录。</p>
+                </div>
+                <div class="info-card">
+                  <h3>可验证</h3>
+                  <p>能检查引用是否准确、是否节省时间、是否帮助决策。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>个人研究助手不是聊天收藏夹，而是能帮你完成研究闭环的工作流。</strong>
+                  <p>它应该输出可追溯的结论和下一步行动。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>项目定义：先做一个窄场景</h2>
+            <p class="lead">不要一开始做万能知识库。先选一个高频任务，例如“根据我的 AI 学习资料回答问题并引用来源”。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>用户</h3>
+                  <p>你自己，目标是 AI 转型学习和产品研究。</p>
+                </div>
+                <div class="info-card">
+                  <h3>输入</h3>
+                  <p>课程 HTML、个人资料、调研资料、实验日志。</p>
+                </div>
+                <div class="info-card">
+                  <h3>输出</h3>
+                  <p>带引用的回答、结构化摘要、待验证问题、下一步行动。</p>
+                </div>
+                <div class="info-card">
+                  <h3>不做</h3>
+                  <p>不做多人协作、不做复杂权限、不做自动发布、不接入敏感数据。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>知识库：资料要可追溯</h2>
+            <p class="lead">个人知识库最容易乱在来源和版本。每条资料都要尽量保留标题、路径、日期和来源。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>资料类型</h3>
+                  <p>课程、笔记、网页、PDF 摘要、项目日志、代码说明。</p>
+                </div>
+                <div class="info-card">
+                  <h3>元数据</h3>
+                  <p>来源、日期、主题、可信度、是否已读。</p>
+                </div>
+                <div class="info-card">
+                  <h3>切分</h3>
+                  <p>按章节、标题、段落切分，避免上下文断裂。</p>
+                </div>
+                <div class="info-card">
+                  <h3>引用</h3>
+                  <p>回答必须指向原始资料或笔记路径。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://developers.openai.com/api/docs/guides/retrieval" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">OpenAI 官方文档</span>
+                  <strong>Retrieval：个人知识库的检索底座</strong>
+                  <p>对照文档理解文件进入向量库后如何切分、搜索、过滤和返回可引用片段。</p>
+                  <span class="resource-action">建议：先用 5 份课件建立小知识库，不要一次导入全部资料。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>工作流：从提问到复盘</h2>
+            <p class="lead">个人助手的价值不只是回答问题，而是帮你把学习转成判断、任务和记录。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>提问</b>
+                  <span>提出学习或项目问题。</span>
+                </div>
+                <div class="flow-step">
+                  <b>检索</b>
+                  <span>找相关课程、笔记和资料。</span>
+                </div>
+                <div class="flow-step">
+                  <b>回答</b>
+                  <span>基于资料生成带引用结论。</span>
+                </div>
+                <div class="flow-step">
+                  <b>行动</b>
+                  <span>列出下一步实验或阅读。</span>
+                </div>
+                <div class="flow-step">
+                  <b>沉淀</b>
+                  <span>保存为结构化笔记或项目记录。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>学习模式</h3>
+                  <p>解释概念、给例子、出自测题。</p>
+                </div>
+                <div class="info-card">
+                  <h3>研究模式</h3>
+                  <p>整理证据、对比方案、输出结论和风险。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>评估：个人项目也要验收</h2>
+            <p class="lead">如果不评估，知识库助手会变成看起来很懂但不可依赖的聊天框。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>引用准确</h3>
+                  <p>答案中的关键结论能找到来源。</p>
+                </div>
+                <div class="info-card">
+                  <h3>问题覆盖</h3>
+                  <p>能回答你最常问的学习和项目问题。</p>
+                </div>
+                <div class="info-card">
+                  <h3>节省时间</h3>
+                  <p>比手动搜索笔记更快。</p>
+                </div>
+                <div class="info-card">
+                  <h3>行动质量</h3>
+                  <p>输出的下一步是否具体、可执行、不过度扩展。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage glossary-stage" data-stage="5">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="Personal Knowledge Base" type="button">Personal Knowledge Base</button>
+              <button class="keyword" data-term="RAG" type="button">RAG</button>
+              <button class="keyword" data-term="Citation" type="button">Citation</button>
+              <button class="keyword" data-term="Metadata" type="button">Metadata</button>
+              <button class="keyword" data-term="Chunking" type="button">Chunking</button>
+              <button class="keyword" data-term="Retrieval" type="button">Retrieval</button>
+              <button class="keyword" data-term="Summary" type="button">Summary</button>
+              <button class="keyword" data-term="Action Item" type="button">Action Item</button>
+              <button class="keyword" data-term="Review" type="button">Review</button>
+              <button class="keyword" data-term="Source of Truth" type="button">Source of Truth</button>
+              <button class="keyword" data-term="Tagging" type="button">Tagging</button>
+              <button class="keyword" data-term="Search" type="button">Search</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">Personal Knowledge Base</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">个人知识库。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">保存你的课程、笔记、研究和项目记录。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="6">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么个人知识库适合作为 AI 练手项目？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>它需求真实、数据可控、风险较低，并能练到 RAG、Prompt、评估和工作流。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>个人知识库助手最小范围可以是什么？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>只支持基于课程和笔记回答问题，并给出来源引用和下一步行动。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么必须保留引用？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>引用能验证答案是否基于资料，避免把 AI 的流畅表达误当事实。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>如何评估个人研究助手是否有用？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>看引用准确、常见问题覆盖、节省时间、输出行动是否具体，以及是否帮助沉淀复盘。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">项目定义</button>
+          <button class="step-button" data-step="2" type="button">知识库</button>
+          <button class="step-button" data-step="3" type="button">工作流</button>
+          <button class="step-button" data-step="4" type="button">评估</button>
+          <button class="step-button" data-step="5" type="button">关键词学习</button>
+          <button class="step-button" data-step="6" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "Personal Knowledge Base": {
+            "definition": "个人知识库。",
+            "example": "保存你的课程、笔记、研究和项目记录。"
+      },
+      "RAG": {
+            "definition": "检索增强生成。",
+            "example": "先查你的笔记，再基于笔记回答。"
+      },
+      "Citation": {
+            "definition": "引用来源。",
+            "example": "答案指向具体文件和章节。"
+      },
+      "Metadata": {
+            "definition": "资料的描述信息。",
+            "example": "标题、路径、日期、主题和可信度。"
+      },
+      "Chunking": {
+            "definition": "资料切分。",
+            "example": "按小节切课程内容，方便检索。"
+      },
+      "Retrieval": {
+            "definition": "检索相关资料。",
+            "example": "根据问题找到最相关的个人资料。"
+      },
+      "Summary": {
+            "definition": "摘要。",
+            "example": "把一篇调研文章压成结论、证据和待验证问题。"
+      },
+      "Action Item": {
+            "definition": "行动项。",
+            "example": "下一步阅读、实验、整理或验证任务。"
+      },
+      "Review": {
+            "definition": "复盘。",
+            "example": "记录学到了什么、哪里不懂、下一步做什么。"
+      },
+      "Source of Truth": {
+            "definition": "可信原始来源。",
+            "example": "重要结论要回到原始资料，而不是只看 AI 回答。"
+      },
+      "Tagging": {
+            "definition": "打标签。",
+            "example": "给笔记标注 RAG、Agent、产品指标等主题。"
+      },
+      "Search": {
+            "definition": "搜索。",
+            "example": "关键词搜索和语义搜索可以结合使用。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

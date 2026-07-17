@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 时代的产品经理到底做什么 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --soft: #eef7f5;
+      --teal: #0f9f96;
+      --teal-dark: #08756f;
+      --amber: #f5a524;
+      --coral: #ef6b5a;
+      --green: #3aa66b;
+      --graphite: #273142;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background:
+        linear-gradient(90deg, rgba(15, 159, 150, 0.08), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f5faf9 100%);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .deck {
+      min-height: 100vh;
+      padding: 22px;
+    }
+
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--teal-dark);
+      font-size: 18px;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.06;
+      letter-spacing: 0;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      min-width: 360px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    .left-rail {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .learning-card,
+    .map-card,
+    .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--teal);
+      font-size: 30px;
+      font-weight: 950;
+    }
+
+    .learning-card h2,
+    .stage h2,
+    .map-card h2 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .learning-card p,
+    .map-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.45;
+    }
+
+    .map-card {
+      padding: 18px;
+      align-self: start;
+    }
+
+    .map-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+
+    .map-item strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .map-item span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.36;
+    }
+
+    .workspace {
+      display: grid;
+      min-height: 100%;
+      padding: 24px;
+    }
+
+    .stage {
+      display: none;
+      align-content: start;
+      gap: 18px;
+    }
+
+    .stage.active {
+      display: grid;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--graphite);
+      font-size: 20px;
+      line-height: 1.45;
+      font-weight: 750;
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .info-card,
+    .case-card,
+    .term-detail,
+    .check-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+
+    .info-card h3,
+    .case-card h3,
+    .term-detail h3,
+    .check-card h3 {
+      margin: 0 0 10px;
+      color: var(--graphite);
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .info-card p,
+    .case-card p,
+    .term-detail p,
+    .check-card p,
+    li {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.52;
+    }
+
+    .info-card p,
+    .case-card p,
+    .term-detail p,
+    .check-card p {
+      margin: 0;
+    }
+
+    .compact-list {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .compact-list li + li {
+      margin-top: 8px;
+    }
+
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--teal);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    .principle strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 21px;
+    }
+
+    .explain-block {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .explain-frame {
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+      padding: 12px;
+      min-height: 330px;
+    }
+
+    .explain-image {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 360px;
+      object-fit: contain;
+    }
+
+    .layer-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .layer {
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+    }
+
+    .layer b {
+      display: block;
+      color: var(--graphite);
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .layer span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.36;
+    }
+
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid rgba(15, 159, 150, 0.28);
+      border-radius: 8px;
+      color: var(--teal-dark);
+      background: #f0fbfa;
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .keyword.active {
+      color: var(--white);
+      border-color: var(--teal);
+      background: var(--teal);
+    }
+
+    .keyword.disabled {
+      color: #8a95a3;
+      border-color: #c9d1d8;
+      background: #eef2f4;
+      cursor: not-allowed;
+    }
+
+    .term-detail {
+      min-height: 230px;
+      border-color: rgba(15, 159, 150, 0.34);
+      background: #f8fffe;
+    }
+
+    .term-detail h3 {
+      color: var(--teal-dark);
+      font-size: 24px;
+    }
+
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+
+    .term-block + .term-block {
+      margin-top: 12px;
+    }
+
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .scenario {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .scenario b {
+      color: var(--coral);
+      font-size: 20px;
+    }
+
+    .home-link {
+      color: inherit;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
+
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid rgba(15, 159, 150, 0.3);
+      border-radius: 8px;
+      background: #f4fbfa;
+    }
+
+    .resource-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .resource-heading h3 {
+      margin: 4px 0 0;
+      color: var(--graphite);
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .resource-kicker,
+    .resource-source {
+      color: var(--teal-dark);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .resource-hint {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+
+    .resource-card:hover,
+    .resource-card:focus-visible {
+      border-color: var(--teal);
+      outline: none;
+    }
+
+    .resource-card strong {
+      color: var(--graphite);
+      font-size: 18px;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .resource-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.48;
+    }
+
+    .resource-action {
+      color: var(--teal-dark);
+      font-size: 14px;
+      line-height: 1.42;
+      font-weight: 800;
+    }
+
+    .nav {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding-top: 4px;
+    }
+
+    .nav-button,
+    .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .nav-button {
+      min-width: 110px;
+      padding: 8px 18px;
+    }
+
+    .step-track {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 2px;
+    }
+
+    .step-button {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      color: var(--muted);
+    }
+
+    .step-button.active {
+      color: var(--white);
+      border-color: var(--teal);
+      background: var(--teal);
+    }
+
+    .nav-button:hover,
+    .step-button:hover,
+    .keyword:hover {
+      border-color: var(--teal);
+    }
+
+    @media (max-width: 1180px) {
+      .study-layout,
+      .header,
+      .explain-block {
+        grid-template-columns: 1fr;
+      }
+
+      .meta {
+        justify-content: flex-start;
+        min-width: 0;
+      }
+
+      .grid-2,
+      .grid-3,
+      .layer-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .case-card, .term-detail, .check-card { padding: 14px; }
+      .info-card p, .case-card p, .term-detail p, .check-card p, li { font-size: 16px; }
+      .principle, .scenario { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .explain-frame { min-height: 0; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(245, 250, 249, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+
+    @media print {
+      .nav {
+        display: none;
+      }
+
+      .deck {
+        padding: 0;
+      }
+
+      .slide {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 产品经理入门 01</p>
+          <h1>AI 时代的产品经理到底做什么</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：建立判断框架</span>
+          <span class="pill">输出：一页产品诊断表</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">01</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>先把 AI 产品经理从“会聊模型的人”改写成“能把模型能力变成稳定业务结果的人”。</p>
+            </div>
+          </div>
+
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按顺序看完右侧模块。遇到不熟的词，最后进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>定义角色</strong><span>先区分传统 PM 与 AI PM 的核心差异。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>建立六层框架</strong><span>用任务、模型、数据、工作流、评估、商业化串起来。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>练判断</strong><span>判断一个需求是否值得做成 AI 产品。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>迁移到自己</strong><span>把空间数据、出行、本地生活经验接到 AI 场景。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：不要从模型名开始</h2>
+            <p class="lead">AI 产品的第一性原理不是“哪个模型更强”，而是：用户把一个任务交给系统后，系统能否以可控成本、可评估质量、可接受风险完成它。</p>
+            <div class="grid-3">
+              <div class="info-card">
+                <h3>从任务开始</h3>
+                <p>先问用户原本想完成什么、卡在哪里、现在用什么办法绕过去。AI 只是改变完成任务的方式，不是凭空创造需求。</p>
+              </div>
+              <div class="info-card">
+                <h3>从边界开始</h3>
+                <p>模型会错、会漏、会编，AI PM 必须先定义哪些错误能接受、哪些必须拦截、哪些必须交给人。</p>
+              </div>
+              <div class="info-card">
+                <h3>从指标开始</h3>
+                <p>不要只看“回答像不像”。要看节省时间、转化提升、人工减少、错误率下降、用户是否愿意反复使用。</p>
+              </div>
+            </div>
+            <div class="principle">
+              <div class="principle-label">核心句</div>
+              <div>
+                <strong>AI PM 的工作，是把不稳定的模型能力，包装成可用、可测、可迭代的产品系统。</strong>
+                <p>这里的“系统”包括界面、提示词、检索、工具、权限、人工审核、日志、评估集和商业闭环。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>AI PM 定义：多了一层“能力编排”</h2>
+            <p class="lead">传统 PM 主要把用户需求翻译成产品流程；AI PM 还要判断模型能力是否足够、上下文是否完整、失败后系统如何收尾。</p>
+            <div class="grid-2">
+              <div class="info-card">
+                <h3>传统 PM 更像流程设计</h3>
+                <ul class="compact-list">
+                  <li>定义用户路径和功能优先级。</li>
+                  <li>推动设计、研发、运营协同。</li>
+                  <li>用转化率、留存、成本、满意度验证结果。</li>
+                </ul>
+              </div>
+              <div class="info-card">
+                <h3>AI PM 还要管能力边界</h3>
+                <ul class="compact-list">
+                  <li>判断模型擅长生成、分类、总结、推理还是工具调用。</li>
+                  <li>设计输入上下文、RAG、Tool Use 和人类审批。</li>
+                  <li>用评估集持续检查效果，而不是只靠主观体验。</li>
+                </ul>
+              </div>
+            </div>
+            <div class="scenario">
+              <b>例子</b>
+              <p>做“门店选址助手”时，传统 PM 会设计筛选、地图、报告导出；AI PM 还要判断模型是否能读懂商圈、客流、竞品、租金和 POI 数据，并设计“引用来源”和“低置信度拒答”。</p>
+            </div>
+            <aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div><span class="resource-kicker">延伸学习</span><h3>把 AI 产品判断再学深一层</h3></div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://www.bilibili.com/video/BV1yC4y127uj/" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">Bilibili · 中文学习入口</span>
+                  <strong>吴恩达《AI for Everyone》中文课程</strong>
+                  <p>补齐 AI 术语、项目机会、团队协作和组织落地的基础认知，适合非技术背景转型。</p>
+                  <span class="resource-action">建议：先看项目选择与 AI 团队协作，核心结论回到原课程核对。</span>
+                </a>
+                <a class="resource-card" href="https://pair.withgoogle.com/guidebook-v2/" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">Google PAIR</span>
+                  <strong>People + AI Guidebook</strong>
+                  <p>从用户需求、成功标准、数据、心智模型、信任、反馈和失败恢复设计 AI 产品。</p>
+                  <span class="resource-action">建议：选一个你熟悉的本地生活场景，对照设计模式做诊断。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>六层工作台：一张图看懂 AI 产品判断</h2>
+            <p class="lead">这张图不是装饰图。它对应 AI PM 每次判断需求时都要走完的六层回路：任务、模型、数据、工作流、评估、商业化。</p>
+            <div class="explain-block">
+              <figure class="explain-frame">
+                <img class="explain-image" src="assets/lesson-01/ai-product-system-loop-v2-cropped.png" alt="AI 产品经理六层判断回路图">
+              </figure>
+              <div class="layer-list" aria-label="六层说明">
+                <div class="layer"><b>1. 用户任务</b><span>这个任务是否高频、高成本、强重复，值得交给 AI 辅助？</span></div>
+                <div class="layer"><b>2. 模型能力</b><span>模型是在生成内容、理解意图、调用工具，还是做结构化判断？</span></div>
+                <div class="layer"><b>3. 数据与上下文</b><span>模型需要哪些事实、权限、历史记录、实时数据或外部知识？</span></div>
+                <div class="layer"><b>4. 工作流</b><span>AI 输出后谁确认、谁修改、如何回写系统、失败时怎么降级？</span></div>
+                <div class="layer"><b>5. 评估</b><span>用什么样本和指标判断它真的变好，而不是看起来更会说？</span></div>
+                <div class="layer"><b>6. 商业化与风险</b><span>收益是否覆盖模型、数据、审核和错误成本？风险由谁承担？</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>怎么判断：一个需求是否适合 AI</h2>
+            <p class="lead">不要用“能不能做”判断，要用“做成后是否稳定创造价值”判断。下面这 4 个问题可以过滤掉很多伪需求。</p>
+            <div class="grid-2">
+              <div class="check-card">
+                <h3>1. 输入是否足够清楚</h3>
+                <p>如果用户自己都说不清输入，模型不会自动变成产品。先把输入结构化，AI 才有发挥空间。</p>
+              </div>
+              <div class="check-card">
+                <h3>2. 输出是否能被验收</h3>
+                <p>好的 AI 场景通常有可检查标准，比如答案引用、格式约束、人工通过率、修改次数、任务完成率。</p>
+              </div>
+              <div class="check-card">
+                <h3>3. 错误是否可控</h3>
+                <p>错一条推荐、错一个摘要、错一次路线规划的代价不同。高风险场景必须加拒答、审批和审计。</p>
+              </div>
+              <div class="check-card">
+                <h3>4. 价值是否超过成本</h3>
+                <p>模型调用、检索、标注、审核、延迟都会消耗成本。只有节省时间或带来收入，才值得产品化。</p>
+              </div>
+            </div>
+            <div class="principle">
+              <div class="principle-label">判断式</div>
+              <div>
+                <strong>适合 AI = 明确输入 + 可验收输出 + 可控错误 + 明确收益。</strong>
+                <p>缺一个，就先做更小的 MVP，别急着做完整产品。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>真实案例：把你的经历迁移到 AI 产品</h2>
+            <p class="lead">你之前的出行、本地生活、空间数据经验不是弱项。它们刚好能帮助你判断 AI 应用最容易落地的业务场景。</p>
+            <div class="grid-2">
+              <div class="case-card">
+                <h3>本地生活：商家运营助手</h3>
+                <p>输入门店画像、订单、评价、活动规则，AI 生成运营建议。关键不是“文案好看”，而是建议能否提升转化、复购或履约效率。</p>
+              </div>
+              <div class="case-card">
+                <h3>出行：司机调度解释器</h3>
+                <p>AI 把复杂的供需匹配、补贴、热区变化解释给运营或司机。价值在于降低理解成本，不是替代调度算法。</p>
+              </div>
+              <div class="case-card">
+                <h3>空间数据：位置智能分析</h3>
+                <p>AI 结合地图、POI、人口、交通、竞品，帮助用户提出假设。产品重点是事实引用、地图联动和可追溯分析。</p>
+              </div>
+              <div class="case-card">
+                <h3>量化研究：研究助理</h3>
+                <p>AI 帮你整理公告、生成因子假设、检查回测风险。关键边界是不能把模型输出当确定性结论，必须留证据和验证路径。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="stage glossary-stage" data-stage="5">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">先点熟悉高频词。置灰词代表本节不展开，后续单独学。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="AI 产品经理" type="button">AI 产品经理</button>
+              <button class="keyword" data-term="模型能力" type="button">模型能力</button>
+              <button class="keyword" data-term="数据" type="button">数据</button>
+              <button class="keyword" data-term="工作流" type="button">工作流</button>
+              <button class="keyword" data-term="评估" type="button">评估</button>
+              <button class="keyword" data-term="商业化" type="button">商业化</button>
+              <button class="keyword" data-term="RAG" type="button">RAG</button>
+              <button class="keyword" data-term="Tool Use" type="button">Tool Use</button>
+              <button class="keyword" data-term="Agent" type="button">Agent</button>
+              <button class="keyword" data-term="幻觉" type="button">幻觉</button>
+              <button class="keyword" data-term="人类审批" type="button">人类审批</button>
+              <button class="keyword" data-term="MVP" type="button">MVP</button>
+              <button class="keyword" data-term="失败条件" type="button">失败条件</button>
+              <button class="keyword" data-term="多模态" type="button">多模态</button>
+              <button class="keyword" data-term="微调" type="button">微调</button>
+            </div>
+
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">AI 产品经理</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">把用户任务、模型能力、数据上下文、工作流和评估指标连接起来，让 AI 能稳定产生业务价值的人。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">做“商家运营助手”时，不只是写 prompt，而是定义输入字段、输出格式、引用来源、人工确认、效果指标和失败兜底。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="6">
+            <h2>自测：用 3 分钟检验是否学会</h2>
+            <p class="lead">把下面问题写到自己的笔记里。能答出来，说明你已经抓到 AI PM 的基本框架。</p>
+            <div class="grid-2">
+              <div class="check-card">
+                <h3>问题 1</h3>
+                <p>一个“AI 写周报”功能，用户任务、模型能力、数据、工作流、评估分别是什么？</p>
+              </div>
+              <div class="check-card">
+                <h3>问题 2</h3>
+                <p>如果 AI 输出错了，哪些错误可接受，哪些必须阻止？你会加什么兜底机制？</p>
+              </div>
+              <div class="check-card">
+                <h3>问题 3</h3>
+                <p>把一个你熟悉的本地生活或出行场景改造成 AI 产品，它的 MVP 最小范围是什么？</p>
+              </div>
+              <div class="check-card">
+                <h3>问题 4</h3>
+                <p>你会用什么指标判断这个 AI 功能真的有价值，而不是只是看起来很智能？</p>
+              </div>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">AI PM 定义</button>
+          <button class="step-button" data-step="2" type="button">六层工作台</button>
+          <button class="step-button" data-step="3" type="button">怎么判断</button>
+          <button class="step-button" data-step="4" type="button">真实案例</button>
+          <button class="step-button" data-step="5" type="button">关键词学习</button>
+          <button class="step-button" data-step="6" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "AI 产品经理": {
+        definition: "把用户任务、模型能力、数据上下文、工作流和评估指标连接起来，让 AI 能稳定产生业务价值的人。",
+        example: "做商家运营助手时，不只是写 prompt，而是定义输入字段、输出格式、引用来源、人工确认、效果指标和失败兜底。"
+      },
+      "模型能力": {
+        definition: "模型当前能稳定完成的能力边界，包括理解、生成、总结、分类、推理、检索增强、工具调用等。",
+        example: "模型适合总结用户评论，但不一定能独立判断门店租金是否合理，因为这需要实时数据和业务规则。"
+      },
+      "数据": {
+        definition: "模型完成任务所需的事实、上下文、权限、历史记录和外部知识。",
+        example: "选址助手需要 POI、客流、竞品、租金、交通、历史订单等数据；缺数据时，模型只会说空泛建议。"
+      },
+      "工作流": {
+        definition: "AI 输出进入真实业务后的完整路径，包括谁触发、谁确认、如何修改、如何回写、失败如何处理。",
+        example: "AI 生成活动方案后，运营确认、主管审批、系统创建活动、上线后记录效果，这才是完整工作流。"
+      },
+      "评估": {
+        definition: "用样本、指标和人工标准持续判断 AI 输出质量，而不是只凭一次体验。",
+        example: "对客服摘要，可以评估事实遗漏率、错误率、人工修改时长、客服采纳率。"
+      },
+      "商业化": {
+        definition: "AI 功能能否带来付费、降本、增收、提效或留存改善，并覆盖模型、数据和审核成本。",
+        example: "如果 AI 每次调用成本 0.2 元，但只能节省 5 秒人工，除非规模极大，否则很难成立。"
+      },
+      "RAG": {
+        definition: "Retrieval-Augmented Generation，先从知识库或数据库检索相关资料，再让模型基于资料回答。",
+        example: "让 AI 回答公司制度时，先检索最新制度条款，再要求答案引用条款来源，能减少编造。"
+      },
+      "Tool Use": {
+        definition: "让模型在需要时调用外部工具或 API，比如查数据库、算价格、创建工单、搜索地图。",
+        example: "用户问附近适合开咖啡店的位置，模型先调用地图和商圈数据接口，再生成分析。"
+      },
+      "Agent": {
+        definition: "能围绕目标拆步骤、调用工具、观察结果、继续行动的 AI 系统形态。",
+        example: "研究助理 Agent 可以搜索资料、整理表格、生成摘要、发现缺口后继续补查。"
+      },
+      "幻觉": {
+        definition: "模型生成听起来合理但事实不正确、来源不存在或逻辑跳跃的内容。",
+        example: "AI 给出一个看似真实的政策条文编号，但实际并不存在，这就是幻觉。"
+      },
+      "人类审批": {
+        definition: "在高风险或高价值节点让人确认 AI 输出，防止错误直接进入业务系统。",
+        example: "AI 可以草拟商家补贴方案，但真正发放补贴前必须由运营确认。"
+      },
+      "MVP": {
+        definition: "最小可用产品，用最小范围验证核心假设，而不是一次做完整系统。",
+        example: "先做一个只支持 20 个门店、3 类数据、人工导入表格的选址分析助手，验证是否真的省时间。"
+      },
+      "失败条件": {
+        definition: "提前定义什么结果说明这个 AI 功能不值得继续投入。",
+        example: "如果 2 周内运营采纳率低于 30%，且人工修改时长没有下降，就暂停扩展。"
+      }
+    };
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+
+    document.querySelectorAll(".keyword").forEach((button) => {
+      if (!termDetails[button.dataset.term]) {
+        button.disabled = true;
+        button.classList.add("disabled");
+        return;
+      }
+
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+
+    showStep(0);
+  </script>
+</body>
+</html>

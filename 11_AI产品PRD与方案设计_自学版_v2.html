@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 产品 PRD 与方案设计 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 产品经理能力 11</p>
+          <h1>AI 产品 PRD 与方案设计</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：学会把 AI 想法写成可评审、可开发、可验证的产品方案。</span>
+          <span class="pill">输出：一份 AI PRD 骨架</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">11</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>学会把 AI 想法写成可评审、可开发、可验证的产品方案。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>先写问题</strong><span>用户、场景、痛点、现有替代方案。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>再写能力</strong><span>模型、数据、工具、人工流程如何组合。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>定义边界</strong><span>输入输出、失败、拒答、权限和人工确认。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>写验收</strong><span>指标、样本、日志和上线条件。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：AI PRD 要写清不确定性</h2>
+            <p class="lead">传统 PRD 写功能和流程；AI PRD 还要写模型能力边界、数据来源、失败模式、评估方式和人工兜底。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>用户问题</h3>
+                  <p>不是“做一个 AI 助手”，而是用户在什么任务上花时间、犯错或做不动。</p>
+                </div>
+                <div class="info-card">
+                  <h3>能力组合</h3>
+                  <p>模型只是一个部件，常常还需要 RAG、工具、结构化输出和人工审核。</p>
+                </div>
+                <div class="info-card">
+                  <h3>验收标准</h3>
+                  <p>AI 功能必须用样本和指标验收，而不是只看演示是否顺眼。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>AI PRD = 业务问题 + AI 能力编排 + 风险边界 + 评估闭环。</strong>
+                  <p>没有评估和边界的 AI PRD，很难落地。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>问题定义：先证明这里需要 AI</h2>
+            <p class="lead">AI 是否必要，要从任务成本和输出形态判断。能用规则、搜索或普通表单解决的，不要强行上模型。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>目标用户</h3>
+                  <p>具体到角色和工作场景，例如区域运营、门店拓展、客服主管。</p>
+                </div>
+                <div class="info-card">
+                  <h3>现有流程</h3>
+                  <p>用户现在怎么完成任务，耗时在哪里，错误在哪里。</p>
+                </div>
+                <div class="info-card">
+                  <h3>AI 增量</h3>
+                  <p>AI 相比规则、搜索、模板能新增什么价值。</p>
+                </div>
+                <div class="info-card">
+                  <h3>失败条件</h3>
+                  <p>如果采纳率、质量或成本达不到什么线，就停止或缩小范围。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>能力方案：把模型、数据和工具组合起来</h2>
+            <p class="lead">AI PRD 不能只写“调用大模型”。你要写清楚每一步由谁完成：模型、检索、工具、规则还是人工。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>输入</b>
+                  <span>用户问题、文件、表格或图片。</span>
+                </div>
+                <div class="flow-step">
+                  <b>检索</b>
+                  <span>查知识库、历史案例或业务规则。</span>
+                </div>
+                <div class="flow-step">
+                  <b>工具</b>
+                  <span>算距离、查订单、建工单或生成图表。</span>
+                </div>
+                <div class="flow-step">
+                  <b>生成</b>
+                  <span>模型综合上下文输出结构化结果。</span>
+                </div>
+                <div class="flow-step">
+                  <b>确认</b>
+                  <span>人工审核并回写系统。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>同步还是异步</h3>
+                  <p>长任务可能需要异步处理、进度提示和结果通知。</p>
+                </div>
+                <div class="info-card">
+                  <h3>自动还是半自动</h3>
+                  <p>高风险动作先做草稿和建议，不直接执行。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>交互流程：AI 输出不是流程终点</h2>
+            <p class="lead">AI 产品常见误区是把生成结果当终点。真实流程还包括编辑、确认、引用、纠错、导出和回写。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>输入引导</h3>
+                  <p>帮助用户提供必要字段，减少模型猜测。</p>
+                </div>
+                <div class="info-card">
+                  <h3>过程透明</h3>
+                  <p>展示使用了哪些资料、工具和限制。</p>
+                </div>
+                <div class="info-card">
+                  <h3>结果可编辑</h3>
+                  <p>用户能修改、删除、确认和补充输出。</p>
+                </div>
+                <div class="info-card">
+                  <h3>反馈回流</h3>
+                  <p>把用户修改和拒绝原因沉淀为下一轮评估样本。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>验收上线：上线条件要提前写进 PRD</h2>
+            <p class="lead">AI 功能不能只靠产品经理主观验收。PRD 要写清上线前必须达到的质量、成本、延迟和风险条件。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>评估集</h3>
+                  <p>准备用于验收的固定样本和评分标准。</p>
+                </div>
+                <div class="info-card">
+                  <h3>日志</h3>
+                  <p>记录输入、输出、引用、模型版本、用户修改和错误。</p>
+                </div>
+                <div class="info-card">
+                  <h3>灰度</h3>
+                  <p>先给少量用户或低风险场景使用。</p>
+                </div>
+                <div class="info-card">
+                  <h3>回滚</h3>
+                  <p>质量退化或风险事件发生时，能快速关闭或切回旧流程。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://pair.withgoogle.com/guidebook-v2/" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">Google PAIR</span>
+                  <strong>People + AI Guidebook：产品流程与验收参考</strong>
+                  <p>提供从用户需求到错误恢复的设计模式，可直接转成 AI PRD 的问题清单与验收条件。</p>
+                  <span class="resource-action">建议：选 3 个模式补进本节 PRD 模板。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage glossary-stage" data-stage="5">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="PRD" type="button">PRD</button>
+              <button class="keyword" data-term="User Scenario" type="button">User Scenario</button>
+              <button class="keyword" data-term="User Journey" type="button">User Journey</button>
+              <button class="keyword" data-term="Acceptance Criteria" type="button">Acceptance Criteria</button>
+              <button class="keyword" data-term="Edge Case" type="button">Edge Case</button>
+              <button class="keyword" data-term="Fallback" type="button">Fallback</button>
+              <button class="keyword" data-term="Human Review" type="button">Human Review</button>
+              <button class="keyword" data-term="Audit Log" type="button">Audit Log</button>
+              <button class="keyword" data-term="Rollout" type="button">Rollout</button>
+              <button class="keyword" data-term="Rollback" type="button">Rollback</button>
+              <button class="keyword" data-term="Telemetry" type="button">Telemetry</button>
+              <button class="keyword" data-term="Versioning" type="button">Versioning</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">PRD</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">产品需求文档，描述问题、方案、流程、边界和验收。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">AI PRD 需要比普通 PRD 多写模型边界和评估方式。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="6">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>AI PRD 和普通 PRD 最大差异是什么？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>AI PRD 要额外写清模型能力边界、数据来源、失败模式、评估样本、风险控制和人工兜底。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么 PRD 里要写失败条件？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>防止 AI 项目无限调参。提前定义质量、采纳、成本和风险红线，便于及时收缩或停止。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>AI 输出后为什么还要设计编辑和确认流程？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>因为模型可能错、漏或不符合业务语气，用户需要确认和修正，修改记录还能反哺评估。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>上线前最少需要哪些验收材料？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>需要评估样本、评分标准、日志字段、灰度范围、回滚方案和关键风险阈值。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">问题定义</button>
+          <button class="step-button" data-step="2" type="button">能力方案</button>
+          <button class="step-button" data-step="3" type="button">交互流程</button>
+          <button class="step-button" data-step="4" type="button">验收上线</button>
+          <button class="step-button" data-step="5" type="button">关键词学习</button>
+          <button class="step-button" data-step="6" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "PRD": {
+            "definition": "产品需求文档，描述问题、方案、流程、边界和验收。",
+            "example": "AI PRD 需要比普通 PRD 多写模型边界和评估方式。"
+      },
+      "User Scenario": {
+            "definition": "用户在具体环境中完成任务的场景。",
+            "example": "区域运营每周需要解释门店订单下滑原因。"
+      },
+      "User Journey": {
+            "definition": "用户从触发需求到完成任务的完整路径。",
+            "example": "上传数据、生成分析、修改建议、提交复盘。"
+      },
+      "Acceptance Criteria": {
+            "definition": "验收标准。",
+            "example": "结构化字段通过率大于 95%，事实错误率低于 3%。"
+      },
+      "Edge Case": {
+            "definition": "边界情况。",
+            "example": "资料不足、信息冲突、超长文档、无权限数据。"
+      },
+      "Fallback": {
+            "definition": "失败后的降级或兜底方案。",
+            "example": "AI 无法回答时返回需要补充的信息，而不是编造。"
+      },
+      "Human Review": {
+            "definition": "人工审核 AI 输出。",
+            "example": "补贴建议上线前必须由运营确认。"
+      },
+      "Audit Log": {
+            "definition": "记录关键操作和输出的审计日志。",
+            "example": "记录模型依据、引用来源和人工修改。"
+      },
+      "Rollout": {
+            "definition": "分阶段上线。",
+            "example": "先灰度给 3 个城市，再扩展到全国。"
+      },
+      "Rollback": {
+            "definition": "回滚到旧版本或关闭功能。",
+            "example": "新 prompt 错误率升高时切回旧 prompt。"
+      },
+      "Telemetry": {
+            "definition": "产品运行数据采集。",
+            "example": "采集生成耗时、采纳率、修改率和错误反馈。"
+      },
+      "Versioning": {
+            "definition": "对 prompt、模型、知识库和工具版本管理。",
+            "example": "每条结果记录使用了哪个 prompt 版本。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

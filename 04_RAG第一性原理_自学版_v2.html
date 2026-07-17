@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RAG 第一性原理 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #3977c8;
+      --accent-dark: #1f5798;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 技术基础 04</p>
+          <h1>RAG 第一性原理</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：理解 RAG 为什么能减少幻觉，也理解它为什么不是万能答案。</span>
+          <span class="pill">输出：一张 RAG 产品检查表</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">04</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>理解 RAG 为什么能减少幻觉，也理解它为什么不是万能答案。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>先理解问题</strong><span>RAG 解决的是模型缺资料、资料更新和可追溯问题。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>拆开检索链路</strong><span>从切分、向量化、召回、重排到生成。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>关注产品边界</strong><span>引用、权限、时效、评估决定是否可靠。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>做可验证系统</strong><span>用样本检查召回质量和答案质量。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：RAG 是把相关资料放进上下文</h2>
+            <p class="lead">RAG 的第一性原理很简单：模型不直接记住你的全部知识库，而是在回答前先检索相关资料，再把资料放入上下文，让模型基于资料生成。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>它解决什么</h3>
+                  <p>减少训练截止、内部知识、私有文档和实时资料带来的事实缺口。</p>
+                </div>
+                <div class="info-card">
+                  <h3>它不解决什么</h3>
+                  <p>RAG 不保证检索一定正确，也不保证模型一定忠实使用资料。</p>
+                </div>
+                <div class="info-card">
+                  <h3>产品重点</h3>
+                  <p>检索链路、引用来源、权限过滤、资料时效和评估集，比单纯换模型更关键。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>RAG = 先找资料，再基于资料生成。</strong>
+                  <p>模型负责表达和综合，事实依据来自被检索出来的资料。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>检索链路：从用户问题到可引用答案</h2>
+            <p class="lead">RAG 不是一个单点功能，而是一条链路。链路任何一环弱，最终答案都会不稳定。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>提问</b>
+                  <span>用户提出任务或问题。</span>
+                </div>
+                <div class="flow-step">
+                  <b>改写</b>
+                  <span>必要时把问题改写成更适合检索的查询。</span>
+                </div>
+                <div class="flow-step">
+                  <b>召回</b>
+                  <span>从知识库找出可能相关的片段。</span>
+                </div>
+                <div class="flow-step">
+                  <b>重排</b>
+                  <span>把更相关、更可信、更新的片段排前面。</span>
+                </div>
+                <div class="flow-step">
+                  <b>生成</b>
+                  <span>模型基于片段回答并附引用。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>为什么要重排</h3>
+                  <p>向量召回只保证大致相似，不保证最有用。Rerank 可以把真正回答问题的片段放到前面。</p>
+                </div>
+                <div class="info-card">
+                  <h3>为什么要引用</h3>
+                  <p>引用能让用户检查答案来源，也能帮助你发现召回错、资料旧、模型编造等问题。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://developers.openai.com/api/docs/guides/retrieval" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">OpenAI 官方文档</span>
+                  <strong>Retrieval：向量库与语义检索</strong>
+                  <p>对应本节的切分、向量化、召回、属性过滤和检索结果结构。</p>
+                  <span class="resource-action">建议：带着“错答案来自检索还是生成”这个问题阅读。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>切分与向量：资料怎么进知识库</h2>
+            <p class="lead">很多 RAG 问题不是模型问题，而是知识库准备问题。文档切太碎会丢上下文，切太大又难召回准确片段。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>Chunk 大小</h3>
+                  <p>一个 chunk 应该尽量包含完整语义单元，例如一个条款、一个 FAQ、一个段落或一段表格说明。</p>
+                </div>
+                <div class="info-card">
+                  <h3>元数据</h3>
+                  <p>给每个 chunk 带上来源、时间、权限、业务线、文档类型，后续才能过滤和引用。</p>
+                </div>
+                <div class="info-card">
+                  <h3>Embedding</h3>
+                  <p>把 chunk 转成向量，便于通过语义相似度召回，而不是只做关键词匹配。</p>
+                </div>
+                <div class="info-card">
+                  <h3>混合检索</h3>
+                  <p>实际产品常把关键词检索和向量检索结合，避免专有名词、编号、地名只靠语义匹配失效。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>引用与权限：RAG 产品能不能被信任</h2>
+            <p class="lead">一套 RAG 系统能不能进入真实业务，关键不只是答得像不像，而是能否追溯来源、控制权限、处理过期资料。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>引用</h3>
+                  <p>答案中的关键结论应能对应到具体片段、文件、日期或数据库记录。</p>
+                </div>
+                <div class="info-card">
+                  <h3>权限过滤</h3>
+                  <p>用户没有权限看的资料，不能被检索进上下文，更不能被模型间接泄露。</p>
+                </div>
+                <div class="info-card">
+                  <h3>Freshness</h3>
+                  <p>知识库要能识别资料更新时间。旧资料与新资料冲突时，系统要优先新资料或提示冲突。</p>
+                </div>
+                <div class="info-card">
+                  <h3>Grounding</h3>
+                  <p>要求模型只基于检索资料回答。资料不足时，应返回“不足以回答”而不是补全想象。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>评估：RAG 要分开看检索和生成</h2>
+            <p class="lead">RAG 的失败可能来自没找到资料，也可能来自找到资料但模型没用好。评估时要拆开看。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>检索评估</h3>
+                  <p>检查正确片段是否被召回、排在第几位、是否被权限过滤误伤。</p>
+                </div>
+                <div class="info-card">
+                  <h3>生成评估</h3>
+                  <p>检查答案是否忠实资料、是否有引用、是否覆盖问题、是否承认资料不足。</p>
+                </div>
+                <div class="info-card">
+                  <h3>端到端评估</h3>
+                  <p>用真实问题看用户是否能完成任务，例如客服是否减少查制度时间、运营是否减少人工整理时间。</p>
+                </div>
+                <div class="info-card">
+                  <h3>失败记录</h3>
+                  <p>把问题归类为资料缺失、切分错误、召回错误、重排错误、生成幻觉或权限错误。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage glossary-stage" data-stage="5">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="RAG" type="button">RAG</button>
+              <button class="keyword" data-term="Chunk" type="button">Chunk</button>
+              <button class="keyword" data-term="Embedding" type="button">Embedding</button>
+              <button class="keyword" data-term="向量数据库" type="button">向量数据库</button>
+              <button class="keyword" data-term="召回" type="button">召回</button>
+              <button class="keyword" data-term="Rerank" type="button">Rerank</button>
+              <button class="keyword" data-term="Top-K" type="button">Top-K</button>
+              <button class="keyword" data-term="引用" type="button">引用</button>
+              <button class="keyword" data-term="Grounding" type="button">Grounding</button>
+              <button class="keyword" data-term="知识库" type="button">知识库</button>
+              <button class="keyword" data-term="Freshness" type="button">Freshness</button>
+              <button class="keyword" data-term="权限过滤" type="button">权限过滤</button>
+              <button class="keyword" data-term="评估集" type="button">评估集</button>
+              <button class="keyword" data-term="幻觉" type="button">幻觉</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">RAG</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">Retrieval-Augmented Generation，检索增强生成。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">问公司政策时，先检索制度条款，再让模型基于条款回答。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="6">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么 RAG 不能简单理解成“外挂知识库”？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>因为外挂资料只是第一步，真正效果取决于切分、召回、重排、引用、权限和生成约束。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>一个 RAG 答案错了，应该如何定位问题？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>先看正确资料是否在知识库，再看是否被召回、是否排得足够靠前、是否进了上下文，最后看模型是否忠实使用资料。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么权限过滤必须在 RAG 里前置考虑？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>因为模型只要看到了无权限资料，就可能在回答中泄露。权限不能只靠前端隐藏。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>RAG 的评估为什么要分检索和生成？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>因为没找对资料和找对资料但答错，是两类不同问题；混在一起评估会不知道该改知识库、检索还是 prompt。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">检索链路</button>
+          <button class="step-button" data-step="2" type="button">切分与向量</button>
+          <button class="step-button" data-step="3" type="button">引用与权限</button>
+          <button class="step-button" data-step="4" type="button">评估</button>
+          <button class="step-button" data-step="5" type="button">关键词学习</button>
+          <button class="step-button" data-step="6" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "RAG": {
+            "definition": "Retrieval-Augmented Generation，检索增强生成。",
+            "example": "问公司政策时，先检索制度条款，再让模型基于条款回答。"
+      },
+      "Chunk": {
+            "definition": "知识库中被切分出来的文本片段。",
+            "example": "把一份制度按条款切成多个 chunk，每个 chunk 带来源和更新时间。"
+      },
+      "Embedding": {
+            "definition": "把文本转为向量，用于语义相似度检索。",
+            "example": "“商圈客流”和“门店周边人流”在向量空间中应更接近。"
+      },
+      "向量数据库": {
+            "definition": "存储向量并支持相似度搜索的数据库或索引系统。",
+            "example": "用户提问转成向量后，在向量数据库里找最相似的文档片段。"
+      },
+      "召回": {
+            "definition": "从知识库找出候选资料的过程。",
+            "example": "用户问退款规则，系统先召回相关政策条款。"
+      },
+      "Rerank": {
+            "definition": "重排。对召回结果重新排序，把更相关的资料排到前面。",
+            "example": "召回 20 条后，Rerank 选出最能回答问题的 5 条。"
+      },
+      "Top-K": {
+            "definition": "取排名前 K 个候选结果。",
+            "example": "Top-K=5 表示只把前 5 个片段放进上下文。"
+      },
+      "引用": {
+            "definition": "答案标注依据来源，方便验证和追溯。",
+            "example": "回答后附上制度文件名、条款号和更新时间。"
+      },
+      "Grounding": {
+            "definition": "让模型回答被资料约束，避免脱离依据自由发挥。",
+            "example": "要求每个结论都能在给定资料中找到来源。"
+      },
+      "知识库": {
+            "definition": "可被检索的资料集合，可以是文档、网页、数据库记录或 FAQ。",
+            "example": "内部 SOP、商品规则、商家 FAQ 都可以进入知识库。"
+      },
+      "Freshness": {
+            "definition": "资料的新鲜度和更新时间。",
+            "example": "补贴规则变更后，旧规则必须降权或下线。"
+      },
+      "权限过滤": {
+            "definition": "检索前或检索后根据用户权限过滤资料。",
+            "example": "区域运营不能看到其他区域敏感经营数据。"
+      },
+      "评估集": {
+            "definition": "用于检查 RAG 效果的一组固定问题、正确资料和期望答案。",
+            "example": "准备 100 个真实制度问答，标注应该引用哪些条款。"
+      },
+      "幻觉": {
+            "definition": "模型生成了没有依据或错误的内容。",
+            "example": "资料里没有补贴上限，模型却编出一个金额。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

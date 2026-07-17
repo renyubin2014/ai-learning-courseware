@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>90 天 AI 转型路线与复盘 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #111827;
+      --accent-dark: #111827;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 转型 20</p>
+          <h1>90 天 AI 转型路线与复盘</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：把 20 节课转成 90 天可执行学习、实践和作品集计划。</span>
+          <span class="pill">输出：一张 90 天转型行动表</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">20</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>把 20 节课转成 90 天可执行学习、实践和作品集计划。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>前 30 天</strong><span>补基础、做小练习、形成术语和判断框架。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>中 30 天</strong><span>做 1-2 个 MVP，跑评估和复盘。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>后 30 天</strong><span>整理作品集、竞品研究和面试表达。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>持续复盘</strong><span>每周更新成果、问题和下一步。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：转型靠作品和判断，不靠收藏课程</h2>
+            <p class="lead">90 天目标不是看完资料，而是形成可展示的 AI 产品判断、可运行的小项目和可复盘的研究记录。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>知识</h3>
+                  <p>LLM、Prompt、RAG、Agent、评估、多模态、合规。</p>
+                </div>
+                <div class="info-card">
+                  <h3>项目</h3>
+                  <p>个人知识库助手、AI 选址助手、竞品研究模板。</p>
+                </div>
+                <div class="info-card">
+                  <h3>表达</h3>
+                  <p>作品集、简历项目、面试案例和复盘。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>每周都要有可见产物：笔记、拆解、Demo、评估或复盘。</strong>
+                  <p>没有产物的学习，很难转化成职业能力。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>0-30 天：建立基础和判断框架</h2>
+            <p class="lead">第一阶段重点是把核心概念和产品判断框架打牢，同时完成小练习。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>学习</h3>
+                  <p>完成 1-8 节，理解 AI PM、LLM、Prompt、RAG、Agent、评估和指标。</p>
+                </div>
+                <div class="info-card">
+                  <h3>练习</h3>
+                  <p>每节课写一页检查表或概念卡。</p>
+                </div>
+                <div class="info-card">
+                  <h3>拆解</h3>
+                  <p>每周拆一个 AI 产品，按用户、任务、AI 增量、指标和商业化输出。</p>
+                </div>
+                <div class="info-card">
+                  <h3>复盘</h3>
+                  <p>记录不懂的问题和下一步验证方法。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://www.bilibili.com/video/BV1yC4y127uj/" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">Bilibili · 中文学习入口</span>
+                  <strong>吴恩达《AI for Everyone》中文课程</strong>
+                  <p>适合用中文快速补齐 AI 术语、项目机会、团队协作与组织落地的基础认知。</p>
+                  <span class="resource-action">建议：把视频作为第一阶段补充材料，核心结论回到原课程核对。</span>
+                </a>
+                <a class="resource-card" href="https://www.deeplearning.ai/courses/generative-ai-for-everyone/" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">DeepLearning.AI · 吴恩达</span>
+                  <strong>Generative AI for Everyone</strong>
+                  <p>系统补充生成式 AI 的能力边界、项目方法、商业应用与社会影响。</p>
+                  <span class="resource-action">建议：按 90 天计划分周学习，不需要一次看完。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>31-60 天：做出可运行 MVP</h2>
+            <p class="lead">第二阶段重点是实践。不要做大平台，做一个真实可用的小闭环。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>项目 1</h3>
+                  <p>个人知识库助手：基于课程和笔记回答问题并引用来源。</p>
+                </div>
+                <div class="info-card">
+                  <h3>项目 2</h3>
+                  <p>AI 选址分析助手：输入候选点位，输出风险、证据和建议。</p>
+                </div>
+                <div class="info-card">
+                  <h3>评估</h3>
+                  <p>为每个项目准备 20-50 条样本，记录错误和改进。</p>
+                </div>
+                <div class="info-card">
+                  <h3>文档</h3>
+                  <p>写清目标、范围、不做什么、验证方式和失败条件。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>61-90 天：作品集和面试表达</h2>
+            <p class="lead">第三阶段把学习和项目转成职业材料：作品集、简历 bullet、面试故事和竞品研究。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>作品集</h3>
+                  <p>整理 2-3 个项目案例，每个都有问题、方案、验证和复盘。</p>
+                </div>
+                <div class="info-card">
+                  <h3>简历</h3>
+                  <p>把项目写成结果导向 bullet，突出 AI PM 能力。</p>
+                </div>
+                <div class="info-card">
+                  <h3>面试</h3>
+                  <p>准备产品题、技术边界题、业务题和项目复盘题。</p>
+                </div>
+                <div class="info-card">
+                  <h3>公开材料</h3>
+                  <p>可选：写一篇产品拆解或项目复盘文章。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>周复盘：用固定模板防止学习发散</h2>
+            <p class="lead">每周复盘不需要长，但要能推动下一周行动。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>学了什么</b>
+                  <span>新概念和判断框架。</span>
+                </div>
+                <div class="flow-step">
+                  <b>做了什么</b>
+                  <span>笔记、Demo、测试或拆解。</span>
+                </div>
+                <div class="flow-step">
+                  <b>证据是什么</b>
+                  <span>文件、截图、测试、指标。</span>
+                </div>
+                <div class="flow-step">
+                  <b>问题是什么</b>
+                  <span>卡点和待验证假设。</span>
+                </div>
+                <div class="flow-step">
+                  <b>下周做什么</b>
+                  <span>最多 3 个行动。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>保持小步</h3>
+                  <p>每周一个可交付，不追求大而全。</p>
+                </div>
+                <div class="info-card">
+                  <h3>保持可验证</h3>
+                  <p>每个结论都尽量有样本、测试或来源。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="5">
+            <h2>下一步：从课程进入项目</h2>
+            <p class="lead">20 节课完成后，不要继续无限学概念。下一步应该进入项目制作和作品集打磨。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>第一优先</h3>
+                  <p>个人知识库助手，用你已有课件和笔记做资料源。</p>
+                </div>
+                <div class="info-card">
+                  <h3>第二优先</h3>
+                  <p>AI+空间选址分析助手，突出你的背景优势。</p>
+                </div>
+                <div class="info-card">
+                  <h3>第三优先</h3>
+                  <p>AI 产品竞品研究库，形成可复用分析框架。</p>
+                </div>
+                <div class="info-card">
+                  <h3>持续维护</h3>
+                  <p>把每次项目结果、失败和复盘沉淀到知识库。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage glossary-stage" data-stage="6">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="Learning Loop" type="button">Learning Loop</button>
+              <button class="keyword" data-term="Portfolio" type="button">Portfolio</button>
+              <button class="keyword" data-term="MVP" type="button">MVP</button>
+              <button class="keyword" data-term="Weekly Review" type="button">Weekly Review</button>
+              <button class="keyword" data-term="Milestone" type="button">Milestone</button>
+              <button class="keyword" data-term="Deliverable" type="button">Deliverable</button>
+              <button class="keyword" data-term="Skill Map" type="button">Skill Map</button>
+              <button class="keyword" data-term="Case Study" type="button">Case Study</button>
+              <button class="keyword" data-term="Reflection" type="button">Reflection</button>
+              <button class="keyword" data-term="Action Plan" type="button">Action Plan</button>
+              <button class="keyword" data-term="Evidence" type="button">Evidence</button>
+              <button class="keyword" data-term="Focus" type="button">Focus</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">Learning Loop</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">学习闭环。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">学概念、做练习、验证、复盘、再迭代。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="7">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>90 天转型最重要的产物是什么？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>不是看完多少课，而是形成可展示的作品集、可运行项目、评估证据和复盘记录。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么每周都要有可见产物？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>可见产物能证明学习转化，也能帮助你发现卡点、积累作品和准备面试。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>前 30 天和后 60 天的重点有什么不同？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>前 30 天补基础和框架；后 60 天做项目、评估、复盘、整理作品集。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>20 节课结束后最应该做什么？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>进入项目制作：优先个人知识库助手和 AI+空间选址助手，并把过程沉淀成作品集。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">0-30 天</button>
+          <button class="step-button" data-step="2" type="button">31-60 天</button>
+          <button class="step-button" data-step="3" type="button">61-90 天</button>
+          <button class="step-button" data-step="4" type="button">周复盘</button>
+          <button class="step-button" data-step="5" type="button">下一步</button>
+          <button class="step-button" data-step="6" type="button">关键词学习</button>
+          <button class="step-button" data-step="7" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "Learning Loop": {
+            "definition": "学习闭环。",
+            "example": "学概念、做练习、验证、复盘、再迭代。"
+      },
+      "Portfolio": {
+            "definition": "作品集。",
+            "example": "展示 AI 产品判断和项目落地能力。"
+      },
+      "MVP": {
+            "definition": "最小可用产品。",
+            "example": "用小范围验证核心假设。"
+      },
+      "Weekly Review": {
+            "definition": "周复盘。",
+            "example": "每周总结产物、问题和下一步。"
+      },
+      "Milestone": {
+            "definition": "阶段里程碑。",
+            "example": "30 天完成基础，60 天完成 MVP，90 天完成作品集。"
+      },
+      "Deliverable": {
+            "definition": "可交付物。",
+            "example": "一页检查表、一个 Demo、一个测试结果。"
+      },
+      "Skill Map": {
+            "definition": "能力地图。",
+            "example": "AI PM、技术基础、实践项目、空间数据、量化研究。"
+      },
+      "Case Study": {
+            "definition": "案例研究。",
+            "example": "把项目写成问题、方案、验证和复盘。"
+      },
+      "Reflection": {
+            "definition": "反思复盘。",
+            "example": "记录做错什么、为什么、下次怎么改。"
+      },
+      "Action Plan": {
+            "definition": "行动计划。",
+            "example": "下一周最多 3 个可执行任务。"
+      },
+      "Evidence": {
+            "definition": "证据。",
+            "example": "截图、文件、测试、指标、用户反馈。"
+      },
+      "Focus": {
+            "definition": "聚焦。",
+            "example": "同一阶段只抓少数关键任务，避免发散。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

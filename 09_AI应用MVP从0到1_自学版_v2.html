@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 应用 MVP 从 0 到 1 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #0ea5e9;
+      --accent-dark: #03678f;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 应用实践 09</p>
+          <h1>AI 应用 MVP 从 0 到 1</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：学会把一个 AI 想法压成能本地验证、范围清楚、可复盘的最小产品。</span>
+          <span class="pill">输出：一份 AI MVP 方案卡</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">09</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>学会把一个 AI 想法压成能本地验证、范围清楚、可复盘的最小产品。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>先定场景</strong><span>明确用户、任务、输入、输出和使用频率。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>压缩范围</strong><span>先做最小闭环，不做完整平台。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>快速验证</strong><span>用原型、脚本或半人工流程验证价值。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>记录复盘</strong><span>保存样本、失败、指标和下一步。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：MVP 不是低质量版本</h2>
+            <p class="lead">AI MVP 的第一性原理：用最小成本验证最关键的不确定性。不是做一个粗糙大而全系统，而是做一个能回答核心问题的小闭环。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>验证问题</h3>
+                  <p>用户是否真的有这个任务和痛点。</p>
+                </div>
+                <div class="info-card">
+                  <h3>验证能力</h3>
+                  <p>AI 是否能在可接受边界内完成关键部分。</p>
+                </div>
+                <div class="info-card">
+                  <h3>验证流程</h3>
+                  <p>输出是否能进入用户真实工作，而不是只停留在演示。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>AI MVP = 明确场景 + 最小输入输出 + 可测指标 + 清楚不做什么。</strong>
+                  <p>范围越清楚，验证越快。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://pair.withgoogle.com/guidebook-v2/" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">Google PAIR</span>
+                  <strong>People + AI Guidebook</strong>
+                  <p>按用户需求、成功标准、数据、心智模型、信任、反馈和失败恢复设计 AI 产品。</p>
+                  <span class="resource-action">建议：先看“何时应该在产品中使用 AI”相关设计模式。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>场景定义：先写清楚用户任务</h2>
+            <p class="lead">不要从“我要做一个 AI 工具”开始。先写用户是谁、在什么场景、用什么输入、希望得到什么输出。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>用户</h3>
+                  <p>具体到角色，例如本地生活运营、门店拓展、客服主管，而不是“所有人”。</p>
+                </div>
+                <div class="info-card">
+                  <h3>任务</h3>
+                  <p>一个高频或高价值任务，例如生成门店诊断、整理客服摘要、检查合同风险。</p>
+                </div>
+                <div class="info-card">
+                  <h3>输入</h3>
+                  <p>用户能提供什么材料：表格、文档、图片、地图、历史记录。</p>
+                </div>
+                <div class="info-card">
+                  <h3>输出</h3>
+                  <p>输出被谁使用、如何判断好坏、下一步动作是什么。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>范围压缩：先做一个窄而完整的闭环</h2>
+            <p class="lead">MVP 要砍掉所有暂时不验证核心价值的东西。登录、支付、复杂权限、后台、数据库，很多时候都不是第一步。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>只支持一个场景</h3>
+                  <p>例如只做“门店选址初筛”，不同时做巡检、客服和活动运营。</p>
+                </div>
+                <div class="info-card">
+                  <h3>只支持一种输入</h3>
+                  <p>先从 CSV 或粘贴文本开始，不急着做多格式上传。</p>
+                </div>
+                <div class="info-card">
+                  <h3>只支持一种输出</h3>
+                  <p>先生成固定模板报告，不急着做自由编辑器。</p>
+                </div>
+                <div class="info-card">
+                  <h3>只服务少量样本</h3>
+                  <p>先用 10-30 个真实案例验证质量，而不是追求规模。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>原型验证：能手动就先手动</h2>
+            <p class="lead">AI MVP 可以先用脚本、表格、手工整理、现成 API 或 Wizard-of-Oz 验证。不要一开始就做复杂系统。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>样本</b>
+                  <span>收集真实输入和期望输出。</span>
+                </div>
+                <div class="flow-step">
+                  <b>原型</b>
+                  <span>用最简单界面或脚本跑通。</span>
+                </div>
+                <div class="flow-step">
+                  <b>人工</b>
+                  <span>必要时人工补数据或审核。</span>
+                </div>
+                <div class="flow-step">
+                  <b>指标</b>
+                  <span>记录时间、采纳、错误和成本。</span>
+                </div>
+                <div class="flow-step">
+                  <b>复盘</b>
+                  <span>决定继续、缩小或放弃。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>Wizard-of-Oz</h3>
+                  <p>前端看起来像 AI，背后部分由人工完成，用来验证用户是否需要这个结果。</p>
+                </div>
+                <div class="info-card">
+                  <h3>最小日志</h3>
+                  <p>至少记录输入、输出、模型版本、人工修改和用户反馈，否则无法复盘。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>上线边界：MVP 也要有风险控制</h2>
+            <p class="lead">MVP 可以小，但不能没有边界。尤其是涉及资金、隐私、权限、投资、医疗、法律等场景时，必须保留人工确认。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>不做什么</h3>
+                  <p>明确不做登录、不做付费、不做自动执行、不处理敏感数据，避免范围膨胀。</p>
+                </div>
+                <div class="info-card">
+                  <h3>失败条件</h3>
+                  <p>提前定义低采纳、高错误、高成本时停止，而不是无限调 prompt。</p>
+                </div>
+                <div class="info-card">
+                  <h3>人工兜底</h3>
+                  <p>高风险输出只作为草稿或建议，不直接执行。</p>
+                </div>
+                <div class="info-card">
+                  <h3>样本沉淀</h3>
+                  <p>把失败样本加入评估集，形成下一轮迭代依据。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage glossary-stage" data-stage="5">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="MVP" type="button">MVP</button>
+              <button class="keyword" data-term="User Story" type="button">User Story</button>
+              <button class="keyword" data-term="Scope" type="button">Scope</button>
+              <button class="keyword" data-term="Input/Output" type="button">Input/Output</button>
+              <button class="keyword" data-term="Workflow" type="button">Workflow</button>
+              <button class="keyword" data-term="Prototype" type="button">Prototype</button>
+              <button class="keyword" data-term="Wizard-of-Oz" type="button">Wizard-of-Oz</button>
+              <button class="keyword" data-term="No-code" type="button">No-code</button>
+              <button class="keyword" data-term="API" type="button">API</button>
+              <button class="keyword" data-term="Logging" type="button">Logging</button>
+              <button class="keyword" data-term="QA" type="button">QA</button>
+              <button class="keyword" data-term="Launch" type="button">Launch</button>
+              <button class="keyword" data-term="Feedback Loop" type="button">Feedback Loop</button>
+              <button class="keyword" data-term="Failure Criteria" type="button">Failure Criteria</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">MVP</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">最小可用产品，用最小范围验证核心假设。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">先做只支持 CSV 输入的门店诊断助手，而不是完整 SaaS。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="6">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>AI MVP 为什么不应该一开始做完整平台？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>因为早期最大不确定性是场景、能力和价值，不是账号、支付和后台。先验证核心闭环更快。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>什么叫窄而完整的 MVP？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>只支持一个明确场景、一个主要输入、一个主要输出，但能让用户完成一次真实任务。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>Wizard-of-Oz 适合验证什么？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>适合验证用户是否需要某个结果、是否愿意使用或付费，而不必先把自动化能力全部做出来。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>MVP 阶段为什么也要记录日志？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>没有输入、输出、版本、修改和反馈记录，就无法判断问题来自模型、prompt、数据还是流程。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">场景定义</button>
+          <button class="step-button" data-step="2" type="button">范围压缩</button>
+          <button class="step-button" data-step="3" type="button">原型验证</button>
+          <button class="step-button" data-step="4" type="button">上线边界</button>
+          <button class="step-button" data-step="5" type="button">关键词学习</button>
+          <button class="step-button" data-step="6" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "MVP": {
+            "definition": "最小可用产品，用最小范围验证核心假设。",
+            "example": "先做只支持 CSV 输入的门店诊断助手，而不是完整 SaaS。"
+      },
+      "User Story": {
+            "definition": "描述用户在具体场景下想完成的任务。",
+            "example": "作为门店拓展，我想上传候选点位表，得到风险排序。"
+      },
+      "Scope": {
+            "definition": "本次要做和不做的范围。",
+            "example": "只做单用户本地 HTML，不做账号、支付、云端数据库。"
+      },
+      "Input/Output": {
+            "definition": "产品接收的输入和返回的输出。",
+            "example": "输入门店表格，输出风险等级、原因和下一步建议。"
+      },
+      "Workflow": {
+            "definition": "用户完成任务的完整流程。",
+            "example": "上传数据、生成报告、人工确认、导出结论。"
+      },
+      "Prototype": {
+            "definition": "用于验证想法的原型。",
+            "example": "用一个 HTML 页面和本地样本模拟 AI 报告生成。"
+      },
+      "Wizard-of-Oz": {
+            "definition": "用户以为是系统自动完成，背后部分由人工完成的验证方法。",
+            "example": "先人工整理数据，再让用户体验 AI 选址报告是否有价值。"
+      },
+      "No-code": {
+            "definition": "不写或少写代码完成原型。",
+            "example": "用表格、自动化工具和现成模型 API 先跑通流程。"
+      },
+      "API": {
+            "definition": "系统之间交换能力的接口。",
+            "example": "调用模型 API 生成报告，调用地图 API 查询 POI。"
+      },
+      "Logging": {
+            "definition": "记录输入、输出、版本和反馈。",
+            "example": "每次生成报告都记录样本、prompt、模型和人工修改。"
+      },
+      "QA": {
+            "definition": "质量保障。",
+            "example": "上线前用固定样本检查格式、事实和风险边界。"
+      },
+      "Launch": {
+            "definition": "把功能交给真实用户使用。",
+            "example": "先给 3 个运营试用，而不是直接开放给所有人。"
+      },
+      "Feedback Loop": {
+            "definition": "从用户反馈回到产品迭代的闭环。",
+            "example": "把用户修改最多的字段加入下一轮 prompt 和评估集。"
+      },
+      "Failure Criteria": {
+            "definition": "判断 MVP 不成立或需要收缩的条件。",
+            "example": "两周内采纳率低于 30%，或单次成本高于节省价值。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

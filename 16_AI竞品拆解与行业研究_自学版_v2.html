@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 竞品拆解与行业研究 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #0d9488;
+      --accent-dark: #0f766e;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 产品经理能力 16</p>
+          <h1>AI 竞品拆解与行业研究</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：学会从用户、工作流、模型能力、数据和商业化角度拆解 AI 产品。</span>
+          <span class="pill">输出：一份 AI 竞品拆解模板</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">16</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>学会从用户、工作流、模型能力、数据和商业化角度拆解 AI 产品。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>看用户任务</strong><span>它帮谁完成什么高频或高价值任务。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>拆工作流</strong><span>AI 如何改变原来的流程。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>推能力底座</strong><span>模型、数据、渠道和评估如何支撑。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>判断商业化</strong><span>收费、成本、护城河和风险是否成立。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：竞品拆解不是功能列表</h2>
+            <p class="lead">AI 产品拆解要回答它为什么这样设计、解决什么任务、依赖什么能力、如何收费、风险在哪里。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>用户与任务</h3>
+                  <p>目标用户是谁，原本怎么完成任务。</p>
+                </div>
+                <div class="info-card">
+                  <h3>AI 必要性</h3>
+                  <p>没有 AI 能不能解决，AI 带来的增量是什么。</p>
+                </div>
+                <div class="info-card">
+                  <h3>商业判断</h3>
+                  <p>用户是否愿意付费，成本和护城河是否成立。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>拆 AI 产品，要从工作流变化看价值，而不是从功能截图看热闹。</strong>
+                  <p>功能相似，不代表商业逻辑相同。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>用户任务：先找高频痛点</h2>
+            <p class="lead">AI 产品如果没有强任务，只靠新鲜感很难留存。拆解时先看用户为什么需要它。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>目标用户</h3>
+                  <p>个人、团队、企业、开发者、运营、销售、客服、研究员。</p>
+                </div>
+                <div class="info-card">
+                  <h3>任务频率</h3>
+                  <p>每天、每周、偶发、高价值一次性任务。</p>
+                </div>
+                <div class="info-card">
+                  <h3>替代方案</h3>
+                  <p>用户现在用人工、Excel、搜索、外包还是传统软件。</p>
+                </div>
+                <div class="info-card">
+                  <h3>痛点强度</h3>
+                  <p>省时间、少犯错、增收入、降风险哪个最明确。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>工作流：AI 改变了哪一步</h2>
+            <p class="lead">不要只看“有聊天框”。要画出使用前后流程，判断 AI 替代、增强还是重新组织了工作。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>触发</b>
+                  <span>用户什么时候需要它。</span>
+                </div>
+                <div class="flow-step">
+                  <b>输入</b>
+                  <span>用户提供什么资料。</span>
+                </div>
+                <div class="flow-step">
+                  <b>处理</b>
+                  <span>AI 生成、检索、调用工具。</span>
+                </div>
+                <div class="flow-step">
+                  <b>确认</b>
+                  <span>用户如何审核和修改。</span>
+                </div>
+                <div class="flow-step">
+                  <b>落地</b>
+                  <span>结果如何进入业务系统。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>替代</h3>
+                  <p>把原来人工重复劳动自动化。</p>
+                </div>
+                <div class="info-card">
+                  <h3>增强</h3>
+                  <p>让用户更快完成分析、写作、决策准备。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>能力底座：猜它背后依赖什么</h2>
+            <p class="lead">很多 AI 产品表面是对话，背后真正的壁垒可能是数据、渠道、工作流集成和评估体系。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>模型</h3>
+                  <p>通用大模型、专用模型、多模态模型还是多个模型组合。</p>
+                </div>
+                <div class="info-card">
+                  <h3>数据</h3>
+                  <p>是否有私有数据、实时数据、用户反馈或行业知识库。</p>
+                </div>
+                <div class="info-card">
+                  <h3>集成</h3>
+                  <p>是否深入用户现有工具，例如 CRM、工单、地图、文档、代码库。</p>
+                </div>
+                <div class="info-card">
+                  <h3>评估</h3>
+                  <p>是否有持续质量评估和人工反馈闭环。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>商业化：看付费理由和成本结构</h2>
+            <p class="lead">AI 产品收费不只看功能强弱，还要看价值可感知、替代成本、使用频率和模型成本。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>定价方式</h3>
+                  <p>按席位、按用量、按结果、按套餐增值。</p>
+                </div>
+                <div class="info-card">
+                  <h3>付费触发</h3>
+                  <p>用户什么时候愿意从免费转付费。</p>
+                </div>
+                <div class="info-card">
+                  <h3>毛利压力</h3>
+                  <p>高频长上下文、多模态和 Agent 可能显著增加成本。</p>
+                </div>
+                <div class="info-card">
+                  <h3>护城河</h3>
+                  <p>数据、分发、工作流、品牌、合规、生态集成。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="5">
+            <h2>输出模板：一页竞品拆解</h2>
+            <p class="lead">每次拆解一个 AI 产品，最后沉淀为一页判断，而不是长篇功能流水账。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>一句话判断</h3>
+                  <p>它为谁解决什么任务，AI 增量是什么。</p>
+                </div>
+                <div class="info-card">
+                  <h3>关键流程</h3>
+                  <p>输入、处理、输出、确认、回写。</p>
+                </div>
+                <div class="info-card">
+                  <h3>核心指标</h3>
+                  <p>采纳率、节省时间、转化、留存、成本。</p>
+                </div>
+                <div class="info-card">
+                  <h3>机会判断</h3>
+                  <p>你能借鉴什么，哪些地方不适合照搬。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://hai.stanford.edu/ai-index" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">Stanford HAI</span>
+                  <strong>AI Index</strong>
+                  <p>用长期数据追踪模型能力、产业投入、采用率、政策与公众影响，适合作为行业研究的事实底座。</p>
+                  <span class="resource-action">建议：只摘与你研究赛道直接相关的 3 个指标，并记录年份与口径。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage glossary-stage" data-stage="6">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="Competitor Analysis" type="button">Competitor Analysis</button>
+              <button class="keyword" data-term="Job-to-be-done" type="button">Job-to-be-done</button>
+              <button class="keyword" data-term="Workflow" type="button">Workflow</button>
+              <button class="keyword" data-term="Differentiation" type="button">Differentiation</button>
+              <button class="keyword" data-term="Moat" type="button">Moat</button>
+              <button class="keyword" data-term="Distribution" type="button">Distribution</button>
+              <button class="keyword" data-term="Pricing" type="button">Pricing</button>
+              <button class="keyword" data-term="Adoption" type="button">Adoption</button>
+              <button class="keyword" data-term="Retention" type="button">Retention</button>
+              <button class="keyword" data-term="Switching Cost" type="button">Switching Cost</button>
+              <button class="keyword" data-term="Benchmarking" type="button">Benchmarking</button>
+              <button class="keyword" data-term="Market Map" type="button">Market Map</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">Competitor Analysis</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">竞品分析。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">拆解一个 AI 写作产品的用户、流程和商业化。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="7">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么竞品分析不能只列功能？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>功能列表看不出用户任务、工作流变化、能力依赖、商业化和护城河。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>拆 AI 产品时如何判断 AI 是否必要？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>看没有 AI 是否能低成本完成，以及 AI 是否明显提升速度、质量、规模或体验。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>AI 产品护城河可能来自哪里？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>私有数据、分发渠道、工作流集成、评估体系、品牌信任、合规能力和生态。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>一页竞品拆解应该包含什么？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>目标用户、任务、AI 增量、关键流程、能力底座、指标、商业化、风险和可借鉴点。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">用户任务</button>
+          <button class="step-button" data-step="2" type="button">工作流</button>
+          <button class="step-button" data-step="3" type="button">能力底座</button>
+          <button class="step-button" data-step="4" type="button">商业化</button>
+          <button class="step-button" data-step="5" type="button">输出模板</button>
+          <button class="step-button" data-step="6" type="button">关键词学习</button>
+          <button class="step-button" data-step="7" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "Competitor Analysis": {
+            "definition": "竞品分析。",
+            "example": "拆解一个 AI 写作产品的用户、流程和商业化。"
+      },
+      "Job-to-be-done": {
+            "definition": "用户要完成的任务。",
+            "example": "运营想快速生成门店复盘，而不是想使用 AI。"
+      },
+      "Workflow": {
+            "definition": "完成任务的完整流程。",
+            "example": "资料输入、AI 处理、人工确认、系统回写。"
+      },
+      "Differentiation": {
+            "definition": "差异化。",
+            "example": "同样是客服助手，有的强在知识库，有的强在工单集成。"
+      },
+      "Moat": {
+            "definition": "护城河。",
+            "example": "私有数据、渠道、工作流嵌入和评估体系。"
+      },
+      "Distribution": {
+            "definition": "分发渠道。",
+            "example": "浏览器插件、企业软件市场、现有用户群。"
+      },
+      "Pricing": {
+            "definition": "定价。",
+            "example": "按席位、用量、结果或套餐收费。"
+      },
+      "Adoption": {
+            "definition": "采纳。",
+            "example": "用户是否把 AI 输出用于真实工作。"
+      },
+      "Retention": {
+            "definition": "留存。",
+            "example": "用户是否持续回来使用。"
+      },
+      "Switching Cost": {
+            "definition": "切换成本。",
+            "example": "产品深度接入 CRM 后，用户迁移成本变高。"
+      },
+      "Benchmarking": {
+            "definition": "横向对比指标。",
+            "example": "比较多个产品的任务完成时间和输出质量。"
+      },
+      "Market Map": {
+            "definition": "市场地图。",
+            "example": "按目标用户和任务类型整理 AI 产品格局。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

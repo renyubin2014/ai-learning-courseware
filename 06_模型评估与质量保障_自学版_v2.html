@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>模型评估与质量保障 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #3aa66b;
+      --accent-dark: #247448;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 技术基础 06</p>
+          <h1>模型评估与质量保障</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：学会用评估样本、指标和回归测试判断 AI 功能是否真的变好。</span>
+          <span class="pill">输出：一张 AI 质量评估表</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">06</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>学会用评估样本、指标和回归测试判断 AI 功能是否真的变好。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>先定义对象</strong><span>区分模型评估、任务评估和产品评估。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>建立样本</strong><span>用 Golden Set 覆盖真实和边界场景。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>拆开指标</strong><span>质量、成本、延迟、安全要分开看。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>持续回归</strong><span>每次 prompt、模型或知识库变化都要重测。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：评估不是排行榜</h2>
+            <p class="lead">AI 产品评估的第一性原理：你不是在证明某个模型“最强”，而是在证明它能否在你的任务、数据、成本和风险边界内稳定工作。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>模型评估</h3>
+                  <p>看模型基础能力，例如推理、摘要、代码、多模态理解。它能给方向，但不等于你的产品可用。</p>
+                </div>
+                <div class="info-card">
+                  <h3>任务评估</h3>
+                  <p>看模型在具体任务上的表现，例如门店风险判断、客服摘要、制度问答。</p>
+                </div>
+                <div class="info-card">
+                  <h3>产品评估</h3>
+                  <p>看用户是否完成任务、是否减少时间、是否减少错误、成本是否可接受。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>评估要回答：这个 AI 功能在真实任务里是否更可靠、更省钱、更有价值。</strong>
+                  <p>只看一次演示或通用 benchmark，无法支撑产品决策。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>评估对象：先拆清楚你到底在测什么</h2>
+            <p class="lead">很多评估混乱，是因为把模型、prompt、RAG、工具、界面和人工流程混在一起看。先拆开，才能知道该改哪里。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>模型</h3>
+                  <p>同一批样本下，不同模型的正确率、稳定性、成本和延迟如何。</p>
+                </div>
+                <div class="info-card">
+                  <h3>Prompt</h3>
+                  <p>同一模型下，不同任务说明、示例、输出格式是否改善结果。</p>
+                </div>
+                <div class="info-card">
+                  <h3>RAG</h3>
+                  <p>正确资料是否被召回，模型是否忠实使用资料并给出引用。</p>
+                </div>
+                <div class="info-card">
+                  <h3>工作流</h3>
+                  <p>用户是否能理解、编辑、确认、回写结果，错误是否能被发现。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>离线评估：先用 Golden Set 打底</h2>
+            <p class="lead">上线前先准备一批固定样本，覆盖常见任务和边界情况。它不需要很大，但必须代表真实失败。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>收样本</b>
+                  <span>从真实问题、历史工单、模拟任务中选。</span>
+                </div>
+                <div class="flow-step">
+                  <b>标答案</b>
+                  <span>人工写出可接受答案和拒答条件。</span>
+                </div>
+                <div class="flow-step">
+                  <b>跑版本</b>
+                  <span>同一批样本跑不同 prompt 或模型。</span>
+                </div>
+                <div class="flow-step">
+                  <b>打分</b>
+                  <span>按 rubric 或字段级标准评分。</span>
+                </div>
+                <div class="flow-step">
+                  <b>记录失败</b>
+                  <span>把失败归因到模型、资料、prompt 或流程。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>样本不要只选简单题</h3>
+                  <p>必须包含资料不足、信息冲突、长上下文、噪音输入、高风险问题。</p>
+                </div>
+                <div class="info-card">
+                  <h3>答案不一定只有一个</h3>
+                  <p>生成式任务可以用评分标准，而不是追求完全一样的文本。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://developers.openai.com/api/docs/guides/evals" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">OpenAI 官方文档</span>
+                  <strong>Working with Evals</strong>
+                  <p>从测试数据、评估标准到运行结果，理解如何把“感觉更好”改成可重复验证。</p>
+                  <span class="resource-action">建议：先为你熟悉的产品任务写 10 条最小 Golden Set。</span>
+                </a>
+                <a class="resource-card" href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">Anthropic 工程实践</span>
+                  <strong>Demystifying Evals for AI Agents</strong>
+                  <p>补充多步骤 Agent 的轨迹、工具结果和最终任务完成度应该如何评估。</p>
+                  <span class="resource-action">建议：重点比较单轮回答评估与多轮任务评估。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>在线实验：看真实用户是否受益</h2>
+            <p class="lead">离线评估通过，只说明可以试。真正的产品价值要看用户行为：是否采纳、是否少改、是否更快、是否愿意复用。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>A/B Test</h3>
+                  <p>把用户或任务随机分到不同版本，看真实指标差异。</p>
+                </div>
+                <div class="info-card">
+                  <h3>人工修改率</h3>
+                  <p>AI 输出后用户改了多少，能直接反映可用程度。</p>
+                </div>
+                <div class="info-card">
+                  <h3>任务完成率</h3>
+                  <p>用户是否真的完成了选址分析、客服处理、报告生成等目标。</p>
+                </div>
+                <div class="info-card">
+                  <h3>成本与延迟</h3>
+                  <p>质量提升如果带来过高成本或等待时间，也可能不值得上线。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>质量保障：防止今天能用，明天退化</h2>
+            <p class="lead">AI 系统会因为模型版本、prompt、知识库、业务规则、用户输入变化而退化。质量保障的重点是持续回归。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>Regression</h3>
+                  <p>每次改 prompt、模型、RAG 或工具，都用固定样本重跑，检查旧能力有没有坏。</p>
+                </div>
+                <div class="info-card">
+                  <h3>Data Drift</h3>
+                  <p>用户问题、业务规则和资料分布变化后，旧评估集可能不再代表真实世界。</p>
+                </div>
+                <div class="info-card">
+                  <h3>人工抽检</h3>
+                  <p>关键场景保留人工 review，持续发现新失败模式。</p>
+                </div>
+                <div class="info-card">
+                  <h3>红线指标</h3>
+                  <p>事实错误率、安全违规、权限泄露、错误动作率必须有硬阈值。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage glossary-stage" data-stage="5">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="Benchmark" type="button">Benchmark</button>
+              <button class="keyword" data-term="Eval" type="button">Eval</button>
+              <button class="keyword" data-term="Golden Set" type="button">Golden Set</button>
+              <button class="keyword" data-term="Pass Rate" type="button">Pass Rate</button>
+              <button class="keyword" data-term="Hallucination Rate" type="button">Hallucination Rate</button>
+              <button class="keyword" data-term="Human Review" type="button">Human Review</button>
+              <button class="keyword" data-term="A/B Test" type="button">A/B Test</button>
+              <button class="keyword" data-term="Regression" type="button">Regression</button>
+              <button class="keyword" data-term="Data Drift" type="button">Data Drift</button>
+              <button class="keyword" data-term="Latency" type="button">Latency</button>
+              <button class="keyword" data-term="Cost" type="button">Cost</button>
+              <button class="keyword" data-term="Safety" type="button">Safety</button>
+              <button class="keyword" data-term="Rubric" type="button">Rubric</button>
+              <button class="keyword" data-term="Confidence" type="button">Confidence</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">Benchmark</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">通用能力测试集，用来粗略比较模型能力。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">通用 benchmark 分数高，不代表它一定适合你的门店诊断任务。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="6">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么不能只看模型排行榜选模型？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>排行榜测试的是通用能力，不代表你的任务、数据、成本、延迟和风险边界。产品评估必须用自己的样本和指标。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>Golden Set 应该覆盖哪些样本？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>应覆盖高频任务、复杂任务、资料不足、信息冲突、长上下文、噪音输入和高风险问题。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>离线评估和在线实验有什么区别？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>离线评估看输出是否达标；在线实验看真实用户是否更快、更准、更愿意采纳，以及成本是否可接受。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么 AI 功能需要回归测试？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>模型、prompt、知识库或工具一变，旧能力可能退化。回归测试能及时发现原本能处理的场景被破坏。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">评估对象</button>
+          <button class="step-button" data-step="2" type="button">离线评估</button>
+          <button class="step-button" data-step="3" type="button">在线实验</button>
+          <button class="step-button" data-step="4" type="button">质量保障</button>
+          <button class="step-button" data-step="5" type="button">关键词学习</button>
+          <button class="step-button" data-step="6" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "Benchmark": {
+            "definition": "通用能力测试集，用来粗略比较模型能力。",
+            "example": "通用 benchmark 分数高，不代表它一定适合你的门店诊断任务。"
+      },
+      "Eval": {
+            "definition": "对模型或 AI 系统输出进行系统化评估的过程。",
+            "example": "用同一批客服摘要样本比较两个 prompt 的事实遗漏率。"
+      },
+      "Golden Set": {
+            "definition": "一组固定且人工确认过标准答案的评估样本。",
+            "example": "固定 50 条真实商家问题，每次改 prompt 都重跑。"
+      },
+      "Pass Rate": {
+            "definition": "样本通过标准的比例。",
+            "example": "100 条结构化输出里 92 条字段完整且格式正确，格式 pass rate 为 92%。"
+      },
+      "Hallucination Rate": {
+            "definition": "模型输出无依据或错误事实的比例。",
+            "example": "制度问答中有 8% 的答案引用不存在条款，就要降低上线范围。"
+      },
+      "Human Review": {
+            "definition": "由人工检查 AI 输出质量和风险。",
+            "example": "每周抽检 100 条 AI 生成的运营建议，记录错误类型。"
+      },
+      "A/B Test": {
+            "definition": "把用户或任务分到不同版本，比较真实指标差异。",
+            "example": "一半运营用旧报告，一半用 AI 报告，对比完成时间和采纳率。"
+      },
+      "Regression": {
+            "definition": "回归测试，确认新版本没有破坏旧能力。",
+            "example": "换模型后重新跑旧评估集，检查原本能答对的题是否退化。"
+      },
+      "Data Drift": {
+            "definition": "真实输入或业务环境发生变化，导致旧效果不再稳定。",
+            "example": "旺季商家问题和淡季不同，旧评估集可能覆盖不足。"
+      },
+      "Latency": {
+            "definition": "用户等待 AI 返回结果的时间。",
+            "example": "选址助手如果 40 秒才出报告，用户可能放弃。"
+      },
+      "Cost": {
+            "definition": "模型调用、检索、工具、人工审核等总成本。",
+            "example": "每份报告 3 元模型成本，但只能节省 1 元人工，就不成立。"
+      },
+      "Safety": {
+            "definition": "输出是否符合安全、合规和权限边界。",
+            "example": "AI 不应泄露无权限数据，也不应给确定性投资建议。"
+      },
+      "Rubric": {
+            "definition": "人工或自动评分规则。",
+            "example": "从事实正确、引用准确、建议可执行、格式完整四个维度评分。"
+      },
+      "Confidence": {
+            "definition": "系统对结果可靠性的估计或信号。",
+            "example": "资料不足时返回低置信度，并要求人工确认。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

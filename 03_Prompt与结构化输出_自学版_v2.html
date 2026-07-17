@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt 与结构化输出 - 自学版 v2</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6678;
+      --line: #d8e2e7;
+      --white: #ffffff;
+      --accent: #0f9f96;
+      --accent-dark: #08756f;
+      --graphite: #273142;
+      --soft: #f7fbfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34%), linear-gradient(180deg, #fff 0%, #f8faf8 100%);
+    }
+    button { font: inherit; }
+    .deck { min-height: 100vh; padding: 22px; }
+    .slide {
+      width: min(1800px, 100%);
+      min-height: calc(100vh - 44px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker { margin: 0 0 8px; color: var(--accent-dark); font-size: 18px; font-weight: 850; letter-spacing: 0; }
+    h1 { margin: 0; font-size: 42px; line-height: 1.06; letter-spacing: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; min-width: 360px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: var(--white);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .study-layout {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.68fr) minmax(860px, 1.32fr);
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .left-rail { display: grid; grid-template-rows: auto 1fr; gap: 16px; min-width: 0; }
+    .learning-card, .map-card, .workspace {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .learning-card {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+    }
+    .lesson-number {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 30px;
+      font-weight: 950;
+    }
+    .learning-card h2, .stage h2, .map-card h2 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: 0; }
+    .learning-card p, .map-card p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.45; }
+    .map-card { padding: 18px; align-self: start; }
+    .map-list { display: grid; gap: 10px; margin-top: 16px; }
+    .map-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 2px solid #e2ebee;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .map-index {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 950;
+    }
+    .map-item strong { display: block; font-size: 18px; line-height: 1.2; }
+    .map-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .workspace { display: grid; min-height: 100%; padding: 24px; }
+    .stage { display: none; align-content: start; gap: 18px; }
+    .stage.active { display: grid; }
+    .lead { margin: 0; color: var(--graphite); font-size: 20px; line-height: 1.45; font-weight: 750; }
+    .grid-2, .grid-3 { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .info-card, .term-detail, .quiz-card {
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: var(--white);
+      padding: 16px;
+    }
+    .info-card h3, .term-detail h3, .quiz-card h3 { margin: 0 0 10px; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .info-card p, .term-detail p, .quiz-card p, li { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.52; }
+    .principle {
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 16px;
+      align-items: stretch;
+      padding: 16px;
+      border: 2px solid #dce8eb;
+      border-radius: 8px;
+      background: #fbfefd;
+    }
+    .principle-label {
+      display: grid;
+      place-items: center;
+      min-height: 96px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--accent);
+      font-size: 24px;
+      font-weight: 950;
+      text-align: center;
+      line-height: 1.15;
+    }
+    .principle strong { display: block; margin-bottom: 8px; font-size: 21px; }
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-step {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid #e0eaee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .flow-step b { display: block; color: var(--graphite); font-size: 18px; line-height: 1.2; }
+    .flow-step span { display: block; margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.36; }
+    .home-link { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .resource-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 2px solid color-mix(in srgb, var(--accent) 30%, #d8e2e7);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--accent) 5%, white);
+    }
+    .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+    .resource-heading h3 { margin: 4px 0 0; color: var(--graphite); font-size: 20px; line-height: 1.2; }
+    .resource-kicker, .resource-source { color: var(--accent-dark); font-size: 14px; font-weight: 900; }
+    .resource-hint { color: var(--muted); font-size: 14px; font-weight: 750; }
+    .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .resource-card {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px;
+      border: 2px solid #dfe8eb;
+      border-radius: 8px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .resource-card:hover, .resource-card:focus-visible { border-color: var(--accent); outline: none; }
+    .resource-card strong { color: var(--graphite); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+    .resource-card p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.48; }
+    .resource-action { color: var(--accent-dark); font-size: 14px; line-height: 1.42; font-weight: 800; }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .keyword {
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, white);
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .keyword.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .term-detail { min-height: 230px; border-color: color-mix(in srgb, var(--accent) 42%, white); background: color-mix(in srgb, var(--accent) 5%, white); }
+    .term-detail h3 { color: var(--accent-dark); font-size: 24px; }
+    .term-block {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 2px solid #dce8eb;
+    }
+    .term-block + .term-block { margin-top: 12px; }
+    .term-label {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--graphite);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .quiz-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+    .quiz-card:hover, .quiz-card:focus-visible, .quiz-card.expanded {
+      border-color: color-mix(in srgb, var(--accent) 72%, white);
+      background: color-mix(in srgb, var(--accent) 5%, white);
+      outline: none;
+    }
+    .quiz-card-header { display: flex; gap: 12px; align-items: start; justify-content: space-between; }
+    .quiz-toggle {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: color-mix(in srgb, var(--accent) 14%, white);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .quiz-card.expanded .quiz-toggle { color: var(--white); background: var(--accent); }
+    .quiz-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 2px solid #dce8eb; }
+    .quiz-card.expanded .quiz-answer { display: grid; gap: 8px; }
+    .quiz-answer strong { color: var(--graphite); font-size: 17px; line-height: 1.2; }
+    .nav { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-top: 4px; }
+    .nav-button, .step-button {
+      min-height: 46px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--graphite);
+      font-size: 17px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav-button { min-width: 110px; padding: 8px 18px; }
+    .step-track { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+    .step-button { flex: 0 0 auto; padding: 8px 12px; color: var(--muted); }
+    .step-button.active { color: var(--white); border-color: var(--accent); background: var(--accent); }
+    .nav-button:hover, .step-button:hover, .keyword:hover { border-color: var(--accent); }
+    @media (max-width: 1180px) {
+      .study-layout, .header { grid-template-columns: 1fr; }
+      .meta { justify-content: flex-start; min-width: 0; }
+      .grid-2, .grid-3, .flow-line { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { overflow-x: hidden; }
+      .deck { padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); gap: 12px; }
+      .header { gap: 12px; padding-bottom: 12px; }
+      .kicker { font-size: 15px; }
+      h1 { font-size: 30px; line-height: 1.12; overflow-wrap: anywhere; }
+      .meta { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .pill { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+      .left-rail { display: block; }
+      .map-card { display: none; }
+      .learning-card { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px; }
+      .lesson-number { width: 48px; height: 48px; font-size: 22px; }
+      .learning-card h2, .stage h2 { font-size: 22px; }
+      .learning-card p { font-size: 15px; }
+      .workspace { min-width: 0; padding: 16px; }
+      .stage { gap: 14px; }
+      .lead { font-size: 17px; }
+      .info-card, .term-detail, .quiz-card { padding: 14px; }
+      .info-card p, .term-detail p, .quiz-card p, li { font-size: 16px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-label { min-height: 54px; font-size: 20px; }
+      .term-block { grid-template-columns: 1fr; }
+      .resource-heading { align-items: start; flex-direction: column; gap: 6px; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .nav {
+        position: sticky;
+        z-index: 10;
+        bottom: 0;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        gap: 8px;
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        background: rgba(248, 250, 248, 0.96);
+        backdrop-filter: blur(10px);
+      }
+      .nav-button { min-width: 0; width: 48px; padding: 6px; font-size: 0; }
+      .nav-button::before { font-size: 24px; line-height: 1; }
+      #prevBtn::before { content: "←"; }
+      #nextBtn::before { content: "→"; }
+      .step-track { min-width: 0; scrollbar-width: none; }
+      .step-track::-webkit-scrollbar { display: none; }
+      .step-button { min-height: 44px; padding: 7px 10px; font-size: 15px; }
+    }
+    @media print {
+      .nav { display: none; }
+      .deck { padding: 0; }
+      .slide { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <article class="slide">
+      <header class="header">
+        <div>
+          <p class="kicker"><a class="home-link" href="index.html">AI 学习目录</a> / AI 技术基础 03</p>
+          <h1>Prompt 与结构化输出</h1>
+        </div>
+        <div class="meta" aria-label="课程信息">
+          <span class="pill">40 分钟自学</span>
+          <span class="pill">目标：把 prompt 当成产品接口来设计，而不是当成一句神奇咒语。</span>
+          <span class="pill">输出：一份可复用的任务说明模板</span>
+        </div>
+      </header>
+
+      <section class="study-layout">
+        <aside class="left-rail" aria-label="学习地图">
+          <div class="learning-card">
+            <div class="lesson-number">03</div>
+            <div>
+              <h2>学习目标</h2>
+              <p>把 prompt 当成产品接口来设计，而不是当成一句神奇咒语。</p>
+            </div>
+          </div>
+          <div class="map-card">
+            <h2>学习路径</h2>
+            <p>按右侧步骤学习。遇到不熟的概念，进入“关键词学习”集中点开。</p>
+            <div class="map-list">
+              <div class="map-item">
+                <span class="map-index">1</span>
+                <div><strong>从任务开始</strong><span>先写清楚用户目标、输入材料、输出用途。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">2</span>
+                <div><strong>压住输出形态</strong><span>让模型按字段、格式和边界返回结果。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">3</span>
+                <div><strong>用示例校准</strong><span>用正例和反例降低理解偏差。</span></div>
+              </div>
+              <div class="map-item">
+                <span class="map-index">4</span>
+                <div><strong>用评估闭环</strong><span>用固定样本检查 prompt 是否真的变好。</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="workspace" aria-live="polite">
+          <section class="stage active" data-stage="0">
+            <h2>先学什么：Prompt 是人和模型之间的产品接口</h2>
+            <p class="lead">Prompt 的本质不是写得漂亮，而是把任务、上下文、约束、输出格式和验收标准交给模型。好的 prompt 能减少歧义，让输出更稳定、更可评估。</p>
+            <div class="grid-3">
+                <div class="info-card">
+                  <h3>Prompt 不是魔法</h3>
+                  <p>同一个模型，输入任务越清楚，输出越容易稳定。模糊任务只会把不确定性转嫁给模型。</p>
+                </div>
+                <div class="info-card">
+                  <h3>Prompt 是接口</h3>
+                  <p>接口要定义输入、输出、错误处理和边界。AI 产品里，prompt 就是连接用户意图与模型能力的接口层。</p>
+                </div>
+                <div class="info-card">
+                  <h3>Prompt 要能测试</h3>
+                  <p>如果一个 prompt 只能靠感觉判断好坏，就还没有产品化。至少要有样本、通过标准和失败记录。</p>
+                </div>
+              </div>
+<div class="principle">
+                <div class="principle-label">核心句</div>
+                <div>
+                  <strong>Prompt = 任务说明 + 上下文 + 约束 + 输出格式 + 验收标准。</strong>
+                  <p>先把这五件事写清楚，再谈模型效果。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="1">
+            <h2>任务说明：先把模型要做什么说清楚</h2>
+            <p class="lead">一个稳定的 prompt，第一段通常不是角色扮演，而是任务定义。你要让模型知道它要解决什么问题、读哪些材料、输出给谁用。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>目标</h3>
+                  <p>说明最终要完成的任务，例如“根据门店数据判断开店风险”，而不是“帮我分析一下”。</p>
+                </div>
+                <div class="info-card">
+                  <h3>输入</h3>
+                  <p>列清楚会给模型什么材料：用户问题、表格字段、知识库片段、历史对话、工具返回。</p>
+                </div>
+                <div class="info-card">
+                  <h3>输出用途</h3>
+                  <p>说明结果会被谁使用，进入什么流程。给运营看、给用户看、写入系统，要求完全不同。</p>
+                </div>
+                <div class="info-card">
+                  <h3>边界</h3>
+                  <p>说明不能做什么，比如不能编造事实、不能给投资建议、没有依据时要拒答或要求补充信息。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="2">
+            <h2>结构化输出：让结果能被系统使用</h2>
+            <p class="lead">自由文本适合阅读，不适合进入系统。只要后续要解析、排序、统计、审核，就应该优先设计结构化输出。</p>
+            <div class="flow-line">
+                <div class="flow-step">
+                  <b>字段</b>
+                  <span>先定义必须返回哪些字段。</span>
+                </div>
+                <div class="flow-step">
+                  <b>类型</b>
+                  <span>每个字段是文本、枚举、数字还是数组。</span>
+                </div>
+                <div class="flow-step">
+                  <b>约束</b>
+                  <span>限定长度、取值范围、是否必填。</span>
+                </div>
+                <div class="flow-step">
+                  <b>错误</b>
+                  <span>资料不足时返回什么，而不是硬填。</span>
+                </div>
+                <div class="flow-step">
+                  <b>验收</b>
+                  <span>用样本检查格式和事实是否通过。</span>
+                </div>
+              </div>
+<div class="grid-2">
+                <div class="info-card">
+                  <h3>适合结构化的场景</h3>
+                  <p>风险评级、线索打分、客服摘要、门店诊断、合同要点抽取、报告目录生成。</p>
+                </div>
+                <div class="info-card">
+                  <h3>不适合强结构化的场景</h3>
+                  <p>早期发散、创意探索、用户访谈开放总结。此时可以先自由输出，再逐步沉淀字段。</p>
+                </div>
+              </div>
+<aside class="resource-panel" aria-label="延伸学习材料">
+              <div class="resource-heading">
+                <div>
+                  <span class="resource-kicker">延伸学习</span>
+                  <h3>把这一模块再学深一层</h3>
+                </div>
+                <span class="resource-hint">外部链接 · 新窗口打开</span>
+              </div>
+              <div class="resource-grid">
+                <a class="resource-card" href="https://learn.deeplearning.ai/courses/chatgpt-prompt-eng" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">DeepLearning.AI · 吴恩达 / Isa Fulford</span>
+                  <strong>ChatGPT Prompt Engineering for Developers</strong>
+                  <p>用示例理解迭代式 Prompt、摘要、推断、转换和扩写，适合把本节框架转成动手练习。</p>
+                  <span class="resource-action">建议：先完成前 3 个单元，再重写本节结构化输出练习。</span>
+                </a>
+                <a class="resource-card" href="https://developers.openai.com/api/docs/guides/structured-outputs" target="_blank" rel="noopener noreferrer">
+                  <span class="resource-source">OpenAI 官方文档</span>
+                  <strong>Structured Outputs</strong>
+                  <p>查看如何用 JSON Schema 约束模型输出，以及结构化输出与普通 JSON 模式的差别。</p>
+                  <span class="resource-action">建议：重点看 schema、strict 与拒答处理。</span>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+          <section class="stage" data-stage="3">
+            <h2>示例：Few-shot 是给模型看标准答案</h2>
+            <p class="lead">当任务标准很难一句话说清时，给模型 1-3 个高质量示例，比堆很多抽象要求更有效。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>正例</h3>
+                  <p>展示你希望的输入和输出，让模型学习格式、语气、字段粒度和判断标准。</p>
+                </div>
+                <div class="info-card">
+                  <h3>反例</h3>
+                  <p>展示不接受的输出，比如没有引用、理由空泛、字段缺失、把猜测写成事实。</p>
+                </div>
+                <div class="info-card">
+                  <h3>边界例</h3>
+                  <p>展示资料不足、信息冲突、高风险问题时应如何拒答或要求补充信息。</p>
+                </div>
+                <div class="info-card">
+                  <h3>迁移例</h3>
+                  <p>把你的本地生活、出行、空间数据场景写成示例，可以让 prompt 更贴近你的优势领域。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage" data-stage="4">
+            <h2>评估：Prompt 迭代不能只靠感觉</h2>
+            <p class="lead">Prompt 的问题通常不是“写得不够长”，而是没有用稳定样本检查。每次改 prompt，都要知道改动解决了哪个失败模式。</p>
+            <div class="grid-2">
+                <div class="info-card">
+                  <h3>评估样本</h3>
+                  <p>准备 20-50 条真实或近似真实任务，覆盖简单、复杂、资料不足、冲突信息和高风险场景。</p>
+                </div>
+                <div class="info-card">
+                  <h3>通过标准</h3>
+                  <p>同时看格式通过率、事实正确率、引用命中率、人工修改时间和用户是否采纳。</p>
+                </div>
+                <div class="info-card">
+                  <h3>失败模式</h3>
+                  <p>记录模型常见失败：编造、漏字段、答非所问、格式错、过度自信、没有拒答。</p>
+                </div>
+                <div class="info-card">
+                  <h3>迭代方式</h3>
+                  <p>一次只改一个变量：任务说明、上下文顺序、输出格式、示例或参数。否则无法知道哪个改动有效。</p>
+                </div>
+              </div>
+
+          </section>
+
+          <section class="stage glossary-stage" data-stage="5">
+            <h2>关键词学习：点开看释义和例子</h2>
+            <p class="lead">本页集中处理关键概念。先点你不熟的词，再回到前面模块复看。</p>
+            <div class="keyword-cloud" aria-label="关键词列表">
+              <button class="keyword active" data-term="Prompt" type="button">Prompt</button>
+              <button class="keyword" data-term="System Prompt" type="button">System Prompt</button>
+              <button class="keyword" data-term="上下文" type="button">上下文</button>
+              <button class="keyword" data-term="Few-shot" type="button">Few-shot</button>
+              <button class="keyword" data-term="结构化输出" type="button">结构化输出</button>
+              <button class="keyword" data-term="JSON Schema" type="button">JSON Schema</button>
+              <button class="keyword" data-term="约束" type="button">约束</button>
+              <button class="keyword" data-term="示例" type="button">示例</button>
+              <button class="keyword" data-term="评估样本" type="button">评估样本</button>
+              <button class="keyword" data-term="失败模式" type="button">失败模式</button>
+              <button class="keyword" data-term="Temperature" type="button">Temperature</button>
+              <button class="keyword" data-term="Guardrail" type="button">Guardrail</button>
+            </div>
+            <article class="term-detail" id="termDetail">
+              <h3 id="termTitle">Prompt</h3>
+              <div class="term-block">
+                <span class="term-label">释义</span>
+                <p id="termDefinition">给模型的任务输入，包含目标、上下文、约束和输出要求。</p>
+              </div>
+              <div class="term-block">
+                <span class="term-label">例子</span>
+                <p id="termExample">“根据以下门店数据，输出风险等级、原因、引用字段和建议动作”就是一个任务型 prompt。</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="stage" data-stage="6">
+            <h2>自测：用产品问题检查理解</h2>
+            <p class="lead">点击问题卡片展开参考答案。重点不是背答案，而是训练你把机制翻译成产品判断。</p>
+            <div class="grid-2">
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 1</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>为什么 prompt 不是越长越好？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>因为长 prompt 会增加成本，也可能引入冲突和噪音。好的 prompt 应该清楚、必要、可测试，而不是把所有要求堆在一起。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 2</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>什么时候需要结构化输出？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>当输出要进入系统、被解析、被统计、被审核或被后续工具使用时，就应该优先结构化。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 3</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>Few-shot 示例应该怎么选？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>选最能代表标准的正例、反例和边界例。示例要短、准、覆盖关键判断，不要给模型错误样式。</p>
+                </div>
+              </article>
+              <article class="quiz-card" role="button" tabindex="0" aria-expanded="false">
+                <div class="quiz-card-header">
+                  <h3>问题 4</h3>
+                  <span class="quiz-toggle">查看答案</span>
+                </div>
+                <p>如何判断一次 prompt 迭代真的变好？</p>
+                <div class="quiz-answer">
+                  <strong>参考答案</strong>
+                  <p>用同一批评估样本比较格式通过率、事实正确率、引用命中率、人工修改成本和采纳率。</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="学习步骤">
+        <button class="nav-button" id="prevBtn" type="button" aria-label="上一步">上一页</button>
+        <div class="step-track">
+          <button class="step-button active" data-step="0" type="button">先学什么</button>
+          <button class="step-button" data-step="1" type="button">任务说明</button>
+          <button class="step-button" data-step="2" type="button">结构化输出</button>
+          <button class="step-button" data-step="3" type="button">示例</button>
+          <button class="step-button" data-step="4" type="button">评估</button>
+          <button class="step-button" data-step="5" type="button">关键词学习</button>
+          <button class="step-button" data-step="6" type="button">自测</button>
+        </div>
+        <button class="nav-button" id="nextBtn" type="button" aria-label="下一步">下一页</button>
+      </nav>
+    </article>
+  </main>
+
+  <script>
+    const stages = [...document.querySelectorAll(".stage")];
+    const stepButtons = [...document.querySelectorAll(".step-button")];
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    let currentStep = 0;
+
+    const termDetails = {
+      "Prompt": {
+            "definition": "给模型的任务输入，包含目标、上下文、约束和输出要求。",
+            "example": "“根据以下门店数据，输出风险等级、原因、引用字段和建议动作”就是一个任务型 prompt。"
+      },
+      "System Prompt": {
+            "definition": "系统级指令，通常定义角色边界、优先级、禁区和输出规则。",
+            "example": "客服助手的 system prompt 可以规定不得承诺退款、不得编造政策、必须引用制度条款。"
+      },
+      "上下文": {
+            "definition": "模型当前请求中能看到的所有信息，包括问题、资料、历史对话、工具返回和规则。",
+            "example": "让模型分析商圈时，客流、POI、竞品、租金就是关键上下文。"
+      },
+      "Few-shot": {
+            "definition": "在 prompt 中提供少量示例，让模型模仿期望格式和判断标准。",
+            "example": "给 2 个“好选址分析”的样例，再让模型分析新门店。"
+      },
+      "结构化输出": {
+            "definition": "要求模型按固定字段、JSON、表格或模板返回结果。",
+            "example": "输出 risk_level、reason、evidence、next_action，比一大段自由文本更容易进入系统。"
+      },
+      "JSON Schema": {
+            "definition": "用 schema 明确字段、类型、必填项和取值范围。",
+            "example": "规定 risk_level 只能是 low、medium、high，避免模型写出“偏高但可控”这类不可解析值。"
+      },
+      "约束": {
+            "definition": "对模型输出的限制条件，包括格式、长度、来源、语气、风险边界。",
+            "example": "“只能基于给定资料回答；没有依据时返回 insufficient_evidence”。"
+      },
+      "示例": {
+            "definition": "给模型看的输入输出样本，用于校准标准。",
+            "example": "一个好示例应包含输入、输出和为什么这样判断的依据。"
+      },
+      "评估样本": {
+            "definition": "用来反复检查 prompt 效果的一组固定任务。",
+            "example": "用 30 条真实商家问题比较两个 prompt 的格式通过率和采纳率。"
+      },
+      "失败模式": {
+            "definition": "模型在任务中反复出现的错误类型。",
+            "example": "常见失败模式包括编造事实、漏字段、引用错误、拒答不足。"
+      },
+      "Temperature": {
+            "definition": "控制输出随机性的参数，越高越发散，越低越稳定。",
+            "example": "结构化抽取通常用低 temperature；创意发散可以适当提高。"
+      },
+      "Guardrail": {
+            "definition": "防止模型越界的规则、校验、拒答和人工审核机制。",
+            "example": "当输出涉及补贴、合规或投资判断时，加引用校验和人工审批。"
+      }
+};
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stages.length - 1));
+      stages.forEach((stage, stageIndex) => stage.classList.toggle("active", stageIndex === currentStep));
+      stepButtons.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.step) === currentStep);
+      });
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === stages.length - 1;
+    }
+
+    function showTerm(term) {
+      const detail = termDetails[term];
+      if (!detail) return;
+      document.querySelector("#termTitle").textContent = term;
+      document.querySelector("#termDefinition").textContent = detail.definition;
+      document.querySelector("#termExample").textContent = detail.example;
+      document.querySelectorAll(".keyword").forEach((button) => {
+        button.classList.toggle("active", button.dataset.term === term);
+      });
+    }
+
+    function toggleQuizAnswer(card) {
+      const expanded = card.getAttribute("aria-expanded") === "true";
+      card.setAttribute("aria-expanded", String(!expanded));
+      card.classList.toggle("expanded", !expanded);
+      const toggle = card.querySelector(".quiz-toggle");
+      if (toggle) {
+        toggle.textContent = expanded ? "查看答案" : "收起答案";
+      }
+    }
+
+    stepButtons.forEach((button) => {
+      button.addEventListener("click", () => showStep(Number(button.dataset.step)));
+    });
+    prevBtn.addEventListener("click", () => showStep(currentStep - 1));
+    nextBtn.addEventListener("click", () => showStep(currentStep + 1));
+    document.querySelectorAll(".keyword").forEach((button) => {
+      button.addEventListener("click", () => showTerm(button.dataset.term));
+    });
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      card.addEventListener("click", () => toggleQuizAnswer(card));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleQuizAnswer(card);
+        }
+      });
+    });
+    showStep(0);
+  </script>
+</body>
+</html>
