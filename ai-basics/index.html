@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 基础认知课｜课程目录</title>
+  <style>
+:root {
+  color-scheme: dark;
+  --ink: #f7f3ea;
+  --muted: #b9b8c7;
+  --panel: #171a27;
+  --panel-soft: #20243a;
+  --line: #393e59;
+  --blue: #88a8ff;
+  --violet: #b59aff;
+  --orange: #ffb36b;
+  --green: #78d9b4;
+  --danger: #ff8f8f;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { background: #0c0e17; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(94, 119, 219, 0.2), transparent 28rem),
+    radial-gradient(circle at 88% 18%, rgba(185, 111, 64, 0.14), transparent 26rem),
+    #0c0e17;
+  line-height: 1.7;
+}
+a { color: inherit; }
+button, select, input { font: inherit; }
+button, select { min-height: 44px; }
+button { color: inherit; }
+img { display: block; max-width: 100%; }
+
+.course-index,
+.lesson-shell {
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+}
+.course-index { min-height: 100vh; padding: 72px 0; }
+.kicker {
+  margin: 0 0 12px;
+  color: var(--orange);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.course-index h1,
+.lesson-header h1 {
+  margin: 0;
+  max-width: 17ch;
+  font-size: clamp(2.25rem, 7vw, 5.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+.thesis {
+  max-width: 780px;
+  margin: 24px 0 42px;
+  color: var(--muted);
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+}
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.course-card {
+  display: flex;
+  min-width: 0;
+  min-height: 280px;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(39, 45, 76, 0.92), rgba(20, 22, 35, 0.96));
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  flex-direction: column;
+  transition: transform 180ms ease, border-color 180ms ease;
+}
+.course-card:hover,
+.course-card:focus-visible { transform: translateY(-4px); border-color: var(--blue); }
+.course-card span { color: var(--orange); font-weight: 800; }
+.course-card h2 { margin: auto 0 14px; font-size: 1.65rem; line-height: 1.2; }
+.course-card p { margin: 0; color: var(--muted); }
+
+.lesson-shell { padding: 32px 0 72px; }
+.index-link,
+.text-link {
+  color: var(--blue);
+  text-underline-offset: 0.25em;
+}
+.lesson-header {
+  position: relative;
+  overflow: hidden;
+  margin-top: 26px;
+  padding: clamp(28px, 5vw, 56px);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: linear-gradient(140deg, rgba(43, 49, 83, 0.95), rgba(19, 21, 34, 0.97));
+  box-shadow: var(--shadow);
+}
+.lesson-number { color: var(--orange); font-weight: 850; letter-spacing: 0.08em; }
+.lesson-question { max-width: 760px; margin: 22px 0 0; font-size: 1.2rem; color: var(--muted); }
+.lesson-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 30px 0 0;
+}
+.meta-card { min-width: 0; padding: 16px; border-radius: 15px; background: rgba(10, 12, 21, 0.5); }
+.meta-card strong { display: block; margin-bottom: 5px; color: var(--green); }
+.concept-figure {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(220px, 0.55fr);
+  gap: 22px;
+  align-items: center;
+  margin: 22px 0 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #10131f;
+}
+.concept-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 14px; background: #24283b; }
+.concept-figure figcaption { color: var(--muted); }
+
+.learning-route {
+  position: static;
+  margin: 24px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(12, 14, 23, 0.94);
+  backdrop-filter: blur(14px);
+}
+.learning-route h2 { margin: 0 0 10px; font-size: 1rem; color: var(--muted); }
+.step-list { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; }
+.step-button {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #171a28;
+  cursor: pointer;
+}
+.step-button.active { border-color: var(--orange); background: #3a2a25; }
+.step-button.active::before { content: "当前 · "; color: var(--orange); font-weight: 800; }
+
+.stage {
+  margin: 22px 0;
+  padding: clamp(24px, 4vw, 42px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(23, 26, 39, 0.96);
+  box-shadow: var(--shadow);
+}
+.stage[hidden] { display: none; }
+.stage-label { margin: 0 0 8px; color: var(--orange); font-weight: 800; }
+.stage h2 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.45rem); line-height: 1.2; }
+.stage-lead { max-width: 820px; margin: 14px 0 24px; color: var(--muted); font-size: 1.08rem; }
+.content-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.content-block {
+  min-width: 0;
+  padding: 18px;
+  border-left: 4px solid var(--blue);
+  border-radius: 13px;
+  background: var(--panel-soft);
+}
+.content-block[data-type="boundary"] { border-left-color: var(--orange); }
+.content-block h3 { margin: 0 0 8px; font-size: 1.08rem; }
+.content-block p { margin: 0; color: var(--muted); }
+.analogy-note { margin-top: 12px !important; }
+.analogy-boundary { color: #ffd2aa !important; }
+.deep-dive {
+  margin-top: 20px;
+  padding: 0 18px;
+  border: 1px solid #555b7b;
+  border-radius: 14px;
+  background: #111522;
+}
+.deep-dive summary { min-height: 44px; padding: 12px 0; color: var(--violet); font-weight: 800; cursor: pointer; }
+.deep-dive p { margin: 0 0 18px; color: var(--muted); }
+
+.keyword-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.keyword {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #20243a;
+  cursor: pointer;
+  text-align: left;
+}
+.keyword.active { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+.keyword.active::after { content: "已选择"; display: block; margin-top: 8px; color: var(--ink); font-size: 0.82rem; font-weight: 800; }
+.keyword-fallback { display: block; margin-top: 8px; color: var(--muted); font-size: 0.86rem; }
+.js .keyword-fallback { display: none; }
+.term-detail {
+  min-height: 190px;
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid var(--green);
+  border-radius: 16px;
+  background: rgba(30, 66, 59, 0.32);
+}
+.term-detail h3 { margin: 0 0 10px; }
+.term-detail p { margin: 8px 0; }
+
+.quiz-list { display: grid; gap: 12px; }
+.quiz-card { border: 1px solid var(--line); border-radius: 15px; background: #111521; }
+.quiz-toggle {
+  width: 100%;
+  padding: 17px;
+  border: 0;
+  border-radius: 15px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 760;
+}
+.quiz-toggle::after { content: "展开参考答案"; float: right; color: var(--blue); font-size: 0.9rem; }
+.quiz-card[aria-expanded="true"] .quiz-toggle::after { content: "收起参考答案"; }
+.quiz-answer { padding: 0 17px 17px; color: var(--muted); }
+.quiz-answer strong { color: var(--green); }
+
+.experiment-panel {
+  padding: 20px;
+  border: 1px solid var(--orange);
+  border-radius: 17px;
+  background: rgba(69, 46, 28, 0.32);
+}
+.experiment-panel fieldset { margin: 16px 0; padding: 16px; border: 1px solid var(--line); border-radius: 13px; }
+.experiment-panel legend { padding: 0 6px; font-weight: 800; }
+.option-stack { display: grid; gap: 10px; }
+.option-row { display: flex; min-height: 44px; gap: 10px; align-items: center; }
+.option-row input { width: 20px; height: 20px; }
+.experiment-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.action-button,
+.temperature-button,
+.stage-nav button {
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #242940;
+  cursor: pointer;
+}
+.action-button.primary { border-color: var(--orange); background: #513526; }
+.temperature-button.active { border-color: var(--green); background: #1d4a3e; }
+.experiment-feedback { min-height: 3.4em; margin: 16px 0 0; padding: 12px; border-radius: 10px; background: #10131d; }
+.token-list { display: grid; gap: 9px; margin-top: 16px; }
+.token-row { display: grid; grid-template-columns: 90px minmax(0, 1fr) 70px; gap: 10px; align-items: center; }
+.probability-track { height: 12px; overflow: hidden; border-radius: 999px; background: #31364e; }
+.probability-bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--violet)); }
+.experiment-brief { padding: 14px; border-radius: 12px; background: #121622; }
+
+.sources { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.sources h3 { margin: 0 0 8px; }
+.sources ul { margin: 0; padding-left: 1.2rem; color: var(--muted); }
+.sources a { color: var(--blue); overflow-wrap: anywhere; }
+.stage-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: var(--panel);
+}
+.stage-nav button:disabled { cursor: not-allowed; opacity: 0.46; }
+.lesson-footer { margin-top: 24px; color: var(--muted); text-align: center; }
+
+@media (max-width: 800px) {
+  .course-grid,
+  .lesson-meta,
+  .content-grid,
+  .concept-figure { grid-template-columns: 1fr; }
+  .keyword-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .learning-route { position: static; }
+}
+
+@media (max-width: 390px) {
+  .course-index,
+  .lesson-shell { width: min(100% - 24px, 1120px); }
+  .course-index { padding: 38px 0; }
+  .course-card { min-height: 230px; padding: 20px; }
+  .lesson-shell { padding-top: 18px; }
+  .lesson-header,
+  .stage { padding: 20px; border-radius: 18px; }
+  .lesson-header h1 { font-size: 2.25rem; overflow-wrap: anywhere; }
+  .keyword-grid { grid-template-columns: 1fr; }
+  .token-row { grid-template-columns: 68px minmax(0, 1fr) 54px; font-size: 0.9rem; }
+  .stage-nav { padding: 12px; }
+  .stage-nav button { flex: 1; min-width: 0; padding-inline: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+}
+
+@media print {
+  :root { color-scheme: light; --ink: #111; --muted: #333; --panel: #fff; --panel-soft: #f4f4f4; --line: #aaa; }
+  body { background: #fff; color: #111; }
+  .course-index,
+  .lesson-shell { width: 100%; }
+  .learning-route,
+  .stage-nav,
+  .index-link { display: none !important; }
+  .stage,
+  .stage[hidden] { display: block !important; break-inside: avoid; box-shadow: none; }
+  .course-card,
+  .lesson-header { box-shadow: none; }
+  .keyword-fallback,
+  .js .keyword-fallback,
+  .quiz-answer[hidden] { display: block !important; }
+  .concept-figure img { max-height: 260px; object-fit: contain; }
+}
+</style>
+</head>
+<body><main class="course-index"><p class="kicker">训练 → 生成 → 行动</p><h1>AI 基础认知课</h1><p class="thesis">AI 不是一个会思考的人，而是一套从数据中学习规律、根据上下文计算概率，并借助外部知识与工具完成任务的系统。</p><section class="course-grid"><a class="course-card" href="01_AI是怎样学会的.html"><span>第 01 课</span><h2>AI 是怎样“学会”的？</h2><p>能区分 AI、ML、DL、生成式 AI 与 LLM，并用损失、反向传播、梯度下降、预训练/微调/对齐说明模型如何学习。</p></a>
+<a class="course-card" href="02_LLM怎样生成一句话.html"><span>第 02 课</span><h2>LLM 是怎样生成一句话的？</h2><p>能解释 Token ID、Embedding、位置信息、Attention、条件概率与采样，并说明 P(下一个 Token | 当前上下文) 不是思维过程。</p></a>
+<a class="course-card" href="03_模型怎样走向Agent.html"><span>第 03 课</span><h2>模型怎样从聊天走向 Agent？</h2><p>能区分 Workflow、Agent、Skill 与 Know-how，画出 Agent Loop，并为状态、记忆、权限、失败恢复和人工审批设计边界。</p></a></section></main><script></script></body>
+</html>
