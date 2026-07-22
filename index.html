@@ -65,6 +65,66 @@
     .panel p { margin: 0; }
     .route-list { margin: 0; padding-left: 22px; }
     .route-list li + li { margin-top: 8px; }
+    .topic-section, .course-section { margin-top: 30px; }
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+      padding-top: 18px;
+      border-top: 2px solid var(--line);
+    }
+    .section-heading h2 { margin: 0; font-size: 28px; line-height: 1.15; }
+    .section-heading p { max-width: 720px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.45; }
+    .topic-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      min-height: 180px;
+      padding: 22px;
+      border: 2px solid var(--teal);
+      border-radius: 8px;
+      color: inherit;
+      background: var(--white);
+      text-decoration: none;
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .topic-card:hover, .topic-card:focus-visible {
+      transform: translateY(-2px);
+      border-color: #08756f;
+      outline: none;
+    }
+    .topic-kicker { margin: 0 0 8px; color: #08756f; font-size: 16px; font-weight: 900; }
+    .topic-card h3 { margin: 0; font-size: 28px; line-height: 1.15; }
+    .topic-card > div > p:not(.topic-kicker) { margin: 10px 0 0; color: var(--muted); font-size: 17px; line-height: 1.5; }
+    .topic-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .topic-meta span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 5px 9px;
+      border: 2px solid #b9ddd9;
+      border-radius: 8px;
+      color: #08756f;
+      background: #f4fbfa;
+      font-size: 14px;
+      font-weight: 850;
+    }
+    .topic-action {
+      align-self: end;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 132px;
+      min-height: 44px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--teal);
+      font-size: 16px;
+      font-weight: 900;
+    }
     .course-grid {
       display: grid;
       grid-template-columns: repeat(5, minmax(220px, 1fr));
@@ -130,6 +190,14 @@
       .panel { padding: 16px; }
       .panel h2 { font-size: 22px; }
       .panel p, .panel li { font-size: 16px; }
+      .topic-section, .course-section { margin-top: 24px; }
+      .section-heading { align-items: start; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+      .section-heading h2 { font-size: 24px; }
+      .section-heading p { font-size: 16px; }
+      .topic-card { grid-template-columns: 1fr; gap: 16px; min-height: 44px; padding: 18px 16px; }
+      .topic-card h3 { font-size: 24px; overflow-wrap: anywhere; }
+      .topic-card > div > p:not(.topic-kicker) { font-size: 16px; }
+      .topic-action { width: 100%; }
       .course-grid { grid-template-columns: 1fr; }
       .course-card { min-height: 0; padding: 16px; }
       .course-card h2 { font-size: 21px; overflow-wrap: anywhere; }
@@ -162,7 +230,33 @@
       </div>
     </section>
 
-    <section class="course-grid" aria-label="课程列表">
+    <section class="topic-section" aria-labelledby="topic-heading">
+      <div class="section-heading">
+        <h2 id="topic-heading">专题知识地图</h2>
+        <p>以知识结构为入口，按自己的问题递归下钻学习。</p>
+      </div>
+      <a class="topic-card" href="专题_大模型知识地图_递归下钻版.html">
+        <div>
+          <p class="topic-kicker">专题知识地图</p>
+          <h3>大模型知识地图</h3>
+          <p>从整体框架进入大模型核心概念，沿知识分支继续下钻，并保留每次学习的足迹。</p>
+          <div class="topic-meta" aria-label="专题能力">
+            <span>112 个知识节点</span>
+            <span>10 个一级板块</span>
+            <span>递归下钻</span>
+            <span>搜索与学习足迹</span>
+          </div>
+        </div>
+        <span class="topic-action">进入知识地图</span>
+      </a>
+    </section>
+
+    <section class="course-section" aria-labelledby="course-heading">
+      <div class="section-heading">
+        <h2 id="course-heading">系统课程</h2>
+        <p>20 节课程按既定顺序，覆盖 AI 产品判断、技术基础与应用实践。</p>
+      </div>
+      <div class="course-grid" aria-label="课程列表">
       <a class="course-card" href="01_AI时代的产品经理到底做什么_自学版_v2.html">
         <span class="course-number">01</span>
         <div>
@@ -383,6 +477,7 @@
           <span class="tag">一张 90 天转型行动表</span>
         </div>
       </a>
+      </div>
     </section>
   </main>
 </body>
